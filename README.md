@@ -2,16 +2,17 @@
 
 # 🤖 Autonomous AI Outreach & Job Application Engine
 
-**An open-source, multi-agent AI system that discovers hidden tech openings, screens for fit, enriches verified founder/recruiter emails, compiles tailored Typst PDF resumes, and prepares personalized Gmail drafts—all running 100% on free-tier APIs.**
+**An open-source, multi-agent AI system that discovers hidden tech openings, screens for fit, enriches verified founder/recruiter emails, compiles tailored Typst PDF resumes, and either sends live emails autonomously or stages reviewable Gmail drafts—all running 100% on free-tier APIs.**
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 [![Cost: 100% Free Tier](https://img.shields.io/badge/Cost-100%25_Free_Tier-brightgreen.svg)](#-100-free-tier-stack)
+[![Outreach Mode](https://img.shields.io/badge/Dispatch-Direct_Send_%7C_Gmail_Drafts-red.svg)](#-dual-dispatch-modes-autopilot-or-draft-review)
 [![Typst Engine](https://img.shields.io/badge/Resume_Engine-Typst_0.11+-orange.svg)](https://typst.app/)
 [![Notion CRM](https://img.shields.io/badge/CRM-Notion_API-black.svg)](https://developers.notion.com/)
 [![Launch Kit](https://img.shields.io/badge/Marketing-Launch_Kit_Included-magenta.svg)](LAUNCH_KIT.md)
 
-[⚡ Fork & Run in 3 Min](#-fork--run-in-3-minutes-zero-coding-required) • [Quickstart](#-local-quickstart-2-minutes) • [Email Template](#-high-converting-cold-email-template) • [Architecture](#-architecture) • [Free Tier Stack](#-100-free-tier-stack) • [Notion CRM Setup](#-notion-crm-setup)
+[⚡ Fork & Run in 3 Min](#-fork--run-in-3-minutes-zero-coding-required) • [Dual Dispatch Modes](#-dual-dispatch-modes-autopilot-or-draft-review) • [Quickstart](#-local-quickstart-2-minutes) • [Email Template](#-high-converting-cold-email-template) • [Architecture](#-architecture) • [Free Tier Stack](#-100-free-tier-stack)
 
 </div>
 
@@ -25,8 +26,8 @@ You don't even need to clone this repository to your machine. You can run the en
 flowchart LR
     A["1. Fork this Repo"] --> B["2. Edit config/profile.json"]
     B --> C["3. Add GitHub Secrets"]
-    C --> D["4. Click 'Run workflow'"]
-    D --> E["📬 Polished Drafts in your Gmail!"]
+    C --> D["4. Select Mode & Run"]
+    D --> E["🚀 Live Direct Send OR 📬 Reviewable Drafts"]
 ```
 
 ### 1. Click [Fork](https://github.com/your-username/ai-outreach-engine/fork)
@@ -50,7 +51,27 @@ Go to **Settings > Secrets and variables > Actions > New repository secret** and
 - Navigate to the **Actions** tab in your repository.
 - Select **Autonomous AI Outreach Engine** from the left sidebar.
 - Click **Run workflow**!
-- The engine will scout fresh openings, compile custom Typst PDF resumes, and stage drafts in your Gmail with resumes attached—ready for your 1-click review and send.
+- Choose your preferred dispatch mode:
+  - 🚀 **`send` (Direct Live Send via Gmail SMTP)**: Dispatches personalized emails directly on autopilot with tailored PDF resumes attached.
+  - 📬 **`draft` (Create Reviewable Gmail Drafts)**: Stages drafts in your Gmail for 1-click human review.
+  - 🔍 **`dry-run`**: Tests candidate screening and resume compilation with zero external actions.
+
+---
+
+## 🚀 Dual Dispatch Modes: Autopilot or Draft Review
+
+The engine supports two distinct execution modes depending on your comfort level:
+
+1. **🔥 Direct Send Autopilot (`DISPATCH_MODE=send`)**:
+   - Sends emails directly to verified hiring managers and founders via Gmail SMTP.
+   - Attaches the dynamic 1-page Typst PDF resume tailored to the target company.
+   - Built-in anti-spam throttling (15s safe pacing between live emails) to protect your domain reputation.
+   - Updates Notion CRM status to `"Email Sent Live"` in real time.
+
+2. **🛡 Draft-First Safety Mode (`DISPATCH_MODE=draft`)**:
+   - Stages fully rendered drafts in your Gmail Drafts folder with the tailored PDF resume attached.
+   - Lets you inspect the pitch, tweak any words if desired, and click **Send** yourself.
+   - Ideal for users who want 100% human-in-the-loop oversight.
 
 ---
 
@@ -58,10 +79,11 @@ Go to **Settings > Secrets and variables > Actions > New repository secret** and
 
 | Feature | Manual Outreach | Typical Job Bots | 🤖 AI Outreach Engine |
 | :--- | :--- | :--- | :--- |
+| **Outreach Options** | Manual typing | Blind spam (bans your domain) | **Dual Modes: Autonomous Live Send via SMTP OR 1-Click Gmail Drafts** |
 | **Time per Application** | 20–30 minutes | Instant | **Autonomous (< 3 seconds)** |
 | **Resume Quality** | Manual editing | Generic PDF dump | **Dynamic Typst PDF tailored to company tech stack** |
 | **Email Quality** | High, but burns you out | Generic AI spam (ignored) | **75–95 word punchy emails with concrete proof of work** |
-| **Safety** | High | Risky (mass bans) | **"Draft-First" (Gmail drafts for 1-click human review)** |
+| **Deliverability** | High | Low (bounces) | **Public DNS MX Verification before every send** |
 | **Monthly Cost** | Free (costs your sanity) | $50–$150/month | **$0.00/month (100% Free Tier APIs)** |
 | **Application Tracking** | Messy spreadsheet | None | **Live bidirectional Notion CRM + CSV ledger** |
 
@@ -182,13 +204,16 @@ python setup.py
 
 ### 3. Run Outreach
 ```bash
-# Safe Dry Run (screens, enriches, and compiles resumes without touching Gmail)
+# 🚀 Option A: Full Autopilot (Directly sends personalized emails via Gmail SMTP)
+python run_agent.py --target 5 --dispatch-mode send --dispatch
+
+# 📬 Option B: Draft Review (Stages drafts in your Gmail for 1-click human review)
+python run_agent.py --target 5 --dispatch-mode draft --dispatch
+
+# 🔍 Option C: Safe Dry Run (Screens, enriches, and compiles resumes without emailing)
 python run_agent.py --dry-run
 
-# Stage drafts in your Gmail (default safe mode)
-python run_agent.py --target 5
-
-# Check service health & diagnostics
+# 🩺 Check service health & diagnostics
 python run_agent.py --status
 ```
 

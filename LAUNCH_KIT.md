@@ -13,7 +13,7 @@ This launch kit contains ready-to-publish social copy, launch posts, and marketi
 > 🔍 Scouts hidden openings & funded startups
 > 🎯 Screens for 1-3 yr seniority fit
 > ✉️ Finds founder emails & compiles custom PDF resumes
-> 📬 Stages drafts in your Gmail
+> 🚀 Sends emails directly on autopilot OR creates reviewable drafts in Gmail
 >
 > It runs 100% on free-tier APIs ($0/mo).
 >
@@ -26,8 +26,8 @@ This launch kit contains ready-to-publish social copy, launch posts, and marketi
 > 1. Job Scout: Scrapes RemoteOK, Remotive, Jobicy & HN "Who is Hiring"
 > 2. Screener: Sub-millisecond regex + Groq LLM filter
 > 3. Enricher: Google Serper + DNS MX deliverability verifier
-> 4. Crafter: Compiles tailored Typst PDF resumes
-> 5. Dispatcher: Creates Gmail drafts for 1-click review
+> 4. Crafter: Compiles tailored Typst PDF resumes in 300ms
+> 5. Dispatcher: Sends emails directly via Gmail SMTP (with anti-spam throttling) OR stages drafts for 1-click review
 
 ### Tweet 3 (The 100% Free Stack):
 > You can run this indefinitely for $0.00/month:
@@ -46,7 +46,7 @@ This launch kit contains ready-to-publish social copy, launch posts, and marketi
 > 3. Add your free Groq API key in Repo Settings > Secrets
 > 4. Click "Actions" > "Run workflow"
 >
-> It stages drafts in your Gmail with tailored resumes attached. You review and click send.
+> Choose your autonomy: Let it send emails directly on autopilot, or create drafts in your Gmail for 1-click review!
 
 ### Tweet 5 (Call to Action):
 > It's 100% open-source under MIT License.
@@ -78,7 +78,9 @@ Over the past few weeks, I built an open-source Autonomous AI Outreach Engine th
 🎯 2. Seniority & Role Guard: Rejects unrealistic 7+ year senior roles in <0.001s, focusing strictly on roles matching your level.
 🔍 3. Executive Lead Enrichment: Uses Google search intelligence and DNS MX checks to verify real founder/lead engineer emails.
 📄 4. Native Typst Resume Compiler: Compiles a unique, ATS-compliant 1-page PDF resume tailored to each company's tech stack in sub-second time.
-✉️ 5. "Draft-First" Safety Guarantee: Stages polished drafts in your Gmail drafts folder with the tailored PDF attached and your master resume, portfolio, and GitHub links cleanly formatted.
+✉️ 5. Dual Dispatch Modes (Full Autopilot or Draft Review):
+   • 🔥 Direct Send Autopilot: Sends emails directly via Gmail SMTP with tailored PDF resumes attached and anti-spam pacing (15s safe throttle).
+   • 🛡 Draft-First Safety: Stages polished drafts in your Gmail for 1-click human verification before sending.
 
 Best part? It runs 100% on free-tier APIs ($0/month):
 • Groq (14,400 free requests/day)
@@ -101,7 +103,7 @@ If you're currently job hunting or know someone who is, check it out and feel fr
 ## 👾 3. Reddit Post (for r/Python, r/SideProject, r/webdev, r/cscareerquestions)
 
 **Title:**
-> I got tired of applying to 100s of ATS black holes, so I built an open-source multi-agent engine that compiles custom resumes and stages Gmail drafts ($0/mo free stack)
+> I got tired of applying to 100s of ATS black holes, so I built an open-source multi-agent engine that compiles custom resumes and sends direct emails or stages Gmail drafts ($0/mo free stack)
 
 **Post Body:**
 ```markdown
@@ -116,7 +118,9 @@ So I built **AI Outreach Engine**, an open-source multi-agent system written in 
 2. **Deterministic & LLM Screening**: First runs a regex filter to reject Senior/Staff/Director roles and seniority mismatches, then scores the remaining jobs against your profile.
 3. **Contact Enrichment & DNS MX Verification**: Uses Google Serper API + direct web crawling to find hiring manager names and emails, and validates them against public DNS MX records to prevent bounces.
 4. **Dynamic Typst PDF Resume Compilation**: Instead of slow LaTeX, it uses [Typst](https://typst.app) (compiled via Python bindings) to generate a customized 1-page PDF resume in <0.5 seconds for each company.
-5. **Draft-First Dispatch**: To prevent accidental spam, it stages drafts in your Gmail drafts folder with the tailored PDF attached and links to your portfolio, GitHub, and master resume. You can review them before hitting send.
+5. **Dual Dispatch Modes**:
+   - **Direct Send Autopilot**: Sends emails directly via Gmail SMTP with tailored PDF resumes attached and built-in anti-spam pacing (15s safe delay).
+   - **Draft Review Mode**: Stages drafts in your Gmail Drafts folder so you can inspect and 1-click send them yourself.
 6. **Notion CRM Sync**: Records every company, contact, match score, and status in Notion.
 
 ### The 100% Free Stack:
@@ -144,7 +148,7 @@ I’d love to hear your feedback on the architecture, prompt design, and any fea
 ```text
 Hi HN,
 
-I built an open-source multi-agent tool in Python that scouts tech jobs, enriches hiring manager emails, compiles tailored 1-page PDF resumes using Typst, and creates Gmail drafts:
+I built an open-source multi-agent tool in Python that scouts tech jobs, enriches hiring manager emails, compiles tailored 1-page PDF resumes using Typst, and either sends emails directly or stages Gmail drafts:
 
 https://github.com/your-username/ai-outreach-engine
 
@@ -155,7 +159,7 @@ Architectural highlights:
 - Multi-Agent Pipeline: Discovery -> Screening -> Enrichment -> Resume Compilation -> Dispatch.
 - Typst over LaTeX: Uses Typst Python bindings to compile clean, ATS-compliant PDFs in ~300ms without needing a 2GB TeX Live distribution.
 - DNS MX Deliverability: Validates discovered emails against DNS MX and disposable domain blocklists to minimize bounce rates.
-- "Draft-First" Safety: Avoids spammy mass-emailing by staging emails in Gmail's Drafts folder (via IMAP) with the tailored PDF attached, keeping a human in the loop.
+- Dual Dispatch: Full hands-off direct outreach via Gmail SMTP (with anti-spam rate limiting) OR human-in-the-loop draft staging via IMAP.
 - 100% Free Tier: Powered by Groq's free tier (14.4k req/day), Serper (2.5k free searches), and GitHub Actions scheduled cron.
 
 Code and setup instructions: https://github.com/your-username/ai-outreach-engine
@@ -170,7 +174,7 @@ Would love any thoughts on the agent orchestration and email deliverability chec
 - **Product Name**: AI Outreach Engine
 - **Tagline**: Autonomous multi-agent job outreach engine (100% free tier)
 - **Pricing**: Free / Open Source (MIT)
-- **Short Description**: Discovers hidden openings, enriches founder emails, compiles tailored Typst PDF resumes, and stages drafts in your Gmail—all powered by free-tier AI APIs.
+- **Short Description**: Discovers hidden openings, enriches founder emails, compiles tailored Typst PDF resumes, and either sends emails directly via Gmail SMTP or stages reviewable drafts—all powered by free-tier AI APIs.
 
 ### First Comment from Maker:
 > Hey Product Hunt community! 👋
@@ -181,7 +185,7 @@ Would love any thoughts on the agent orchestration and email deliverability chec
 > 
 > Key features:
 > • 100% Free Stack: Powered by Groq, Typst, and GitHub Actions ($0/month).
-> • Draft-First Safety: Staged in Gmail for 1-click review.
-> • Fork & Run: Fork the repo, edit `config/profile.json`, and run in GitHub Actions.
+> • Dual Dispatch Modes: Autopilot direct send via Gmail SMTP OR reviewable drafts.
+> • Fork & Run: Fork the repo, edit `config/profile.json`, and run in GitHub Actions in under 3 minutes.
 > 
 > Try it out and let us know what you think! 🚀

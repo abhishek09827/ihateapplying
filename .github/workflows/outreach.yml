@@ -19,9 +19,18 @@ on:
           - all
           - remote-jobs
           - funded-startups
-      dry_run:
-        description: "Run in Dry-Run mode (no emails sent, no Notion updates)"
+      dispatch_mode:
+        description: "Dispatch Mode"
         required: true
+        default: "send"
+        type: choice
+        options:
+          - send (Direct Live Send via Gmail SMTP)
+          - draft (Create Reviewable Gmail Drafts)
+          - dry-run (Simulate with Zero External Action)
+      dry_run:
+        description: "Force Dry-Run (Overrides dispatch mode)"
+        required: false
         type: boolean
         default: false
 
@@ -76,9 +85,20 @@ jobs:
           DISPATCH_MODE: ${{ secrets.DISPATCH_MODE || 'draft' }}
         run: |
           FLAGS="--mode ${{ github.event.inputs.mode || 'all' }} --target ${{ github.event.inputs.target_applications || '5' }}"
-          if [ "${{ github.event.inputs.dry_run }}" = "true" ]; then
+          INPUT_MODE="${{ github.event.inputs.dispatch_mode }}"
+          
+          if [ "${{ github.event.inputs.dry_run }}" = "true" ] || [[ "$INPUT_MODE" == *"dry-run"* ]]; then
             FLAGS="$FLAGS --dry-run"
+          elif [[ "$INPUT_MODE" == *"send"* ]]; then
+            FLAGS="$FLAGS --dispatch-mode send --dispatch"
+          elif [[ "$INPUT_MODE" == *"draft"* ]]; then
+            FLAGS="$FLAGS --dispatch-mode draft --dispatch"
+          else
+            # Default fallback to secret or draft
+            FLAGS="$FLAGS --dispatch"
           fi
+
+          echo "Running outreach engine with: python run_agent.py $FLAGS"
           python run_agent.py $FLAGS
 
       - name: Upload Generated PDF Resumes
