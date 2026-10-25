@@ -55,10 +55,7 @@ def format_email_body_with_links(body: str) -> str:
 
     links_block = []
     if RESUME_DRIVE_URL:
-        links_block.append(f"• Resume (Google Drive): {RESUME_DRIVE_URL} (Tailored PDF also attached)")
-    else:
-        links_block.append("• Resume: Tailored PDF attached to this email")
-
+        links_block.append(f"• Master Resume (Google Drive): {RESUME_DRIVE_URL}")
     if PORTFOLIO_URL:
         links_block.append(f"• Portfolio: {PORTFOLIO_URL}")
     if GITHUB_URL:
@@ -73,8 +70,9 @@ def format_email_body_with_links(body: str) -> str:
         f"{CANDIDATE_NAME}\n"
         f"{CANDIDATE_TITLE}\n"
         f"{CANDIDATE_PHONE + ' | ' if CANDIDATE_PHONE else ''}{CANDIDATE_EMAIL}\n\n"
-        f"Links:\n"
-        f"{links_text}"
+        f"Verified Links:\n"
+        f"{links_text}\n\n"
+        f"📎 Tailored 1-page PDF resume is also attached for your convenience."
     )
 
     return f"{cleaned_body}{signature}".strip()

@@ -1,0 +1,51 @@
+{
+  "candidate": {
+    "name": "Alex Mercer",
+    "title": "Software & AI Engineer",
+    "email": "alex.mercer@example.com",
+    "phone": "+1 (555) 019-2834",
+    "location": "San Francisco, CA (Open to Remote Worldwide)",
+    "years_experience": "2 Years (Software Engineer, B.S. Computer Science)",
+    "current_salary": "$85,000 USD / year",
+    "minimum_target_salary": "$90,000 USD / year",
+    "remote_preference": "Remote (Worldwide, US, Europe Async)",
+    "target_roles": [
+      "Software Engineer",
+      "Full Stack Engineer",
+      "Backend Engineer",
+      "AI Engineer",
+      "Applied AI Engineer",
+      "Founding Engineer"
+    ],
+    "target_skills": [
+      "Python",
+      "FastAPI",
+      "TypeScript",
+      "React",
+      "Docker",
+      "PostgreSQL",
+      "Redis",
+      "Kafka"
+    ],
+    "education": "B.S. in Computer Science (2020 – 2024)",
+    "links": {
+      "github": "https://github.com/your-username",
+      "portfolio": "https://your-portfolio.dev",
+      "linkedin": "https://linkedin.com/in/your-profile",
+      "resume_drive": "https://drive.google.com/file/d/YOUR_RESUME_ID/view?usp=sharing"
+    }
+  },
+  "experience_highlights": [
+    "Built event-driven ingestion pipelines handling 40K records/sec using Python, Kafka, and FastAPI.",
+    "Engineered production LLM workflows and semantic search indexing, reducing search query latency by 45%.",
+    "Deployed scalable microservices on Docker/Kubernetes with zero downtime CI/CD automation."
+  ],
+  "open_source": [
+    "Contributed core prompt templating and validation tests to popular open-source AI frameworks.",
+    "Maintained developer tooling libraries with 500+ GitHub stars."
+  ],
+  "flagship_projects": {
+    "AgentOps": "AgentOps (https://github.com/your-username/agentops) — Distributed multi-agent orchestrator with OpenTelemetry tracing.",
+    "QueryFlow": "QueryFlow (https://github.com/your-username/queryflow) — Natural language SQL query engine with sub-5ms cached latency."
+  }
+}

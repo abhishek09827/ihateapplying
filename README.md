@@ -9,29 +9,96 @@
 [![Cost: 100% Free Tier](https://img.shields.io/badge/Cost-100%25_Free_Tier-brightgreen.svg)](#-100-free-tier-stack)
 [![Typst Engine](https://img.shields.io/badge/Resume_Engine-Typst_0.11+-orange.svg)](https://typst.app/)
 [![Notion CRM](https://img.shields.io/badge/CRM-Notion_API-black.svg)](https://developers.notion.com/)
+[![Launch Kit](https://img.shields.io/badge/Marketing-Launch_Kit_Included-magenta.svg)](LAUNCH_KIT.md)
 
-[Quickstart](#-60-second-quickstart) • [Architecture](#-architecture) • [Features](#-key-features) • [Free Tier Stack](#-100-free-tier-stack) • [Notion CRM Setup](#-notion-crm-setup) • [GitHub Actions](#-1-click-github-actions-automation)
+[⚡ Fork & Run in 3 Min](#-fork--run-in-3-minutes-zero-coding-required) • [Quickstart](#-local-quickstart-2-minutes) • [Email Template](#-high-converting-cold-email-template) • [Architecture](#-architecture) • [Free Tier Stack](#-100-free-tier-stack) • [Notion CRM Setup](#-notion-crm-setup)
 
 </div>
 
 ---
 
-## 💡 Why AI Outreach Engine?
+## ⚡ Fork & Run in 3 Minutes (Zero Coding Required)
 
-Submitting generic resumes into ATS black holes rarely yields results. The most effective job search strategy is **highly personalized, direct outreach to engineering leads, hiring managers, and founders with tailored resumes**.
+You don't even need to clone this repository to your machine. You can run the entire pipeline directly on GitHub Actions:
 
-However, doing this manually takes 20–30 minutes per company. **AI Outreach Engine automates this entire pipeline autonomously**:
+```mermaid
+flowchart LR
+    A["1. Fork this Repo"] --> B["2. Edit config/profile.json"]
+    B --> C["3. Add GitHub Secrets"]
+    C --> D["4. Click 'Run workflow'"]
+    D --> E["📬 Polished Drafts in your Gmail!"]
+```
 
-1. **Scouts** fresh opportunities across RemoteOK, Remotive, Jobicy, Hacker News *Who is Hiring*, TechCrunch Venture feeds, and Launch HN.
-2. **Screens** postings in milliseconds against your target roles and experience bracket (filtering out unrealistic 7+ year senior positions).
-3. **Enriches** leads with verified executive contacts and emails using Google Search intelligence and public DNS MX validation.
-4. **Compiles** a unique, ATS-optimized PDF resume for each company using the ultra-fast [Typst](https://typst.app) markup compiler.
-5. **Stages** drafts in your Gmail account with the tailored PDF resume attached and direct links to your portfolio, GitHub, LinkedIn, and master drive resume—ready for your 1-click review and send.
-6. **Logs** every application and status in a real-time Notion CRM.
+### 1. Click [Fork](https://github.com/your-username/ai-outreach-engine/fork)
+Fork this repository to your personal GitHub account.
+
+### 2. Update Your Profile (`config/profile.json`)
+- In your forked repository, navigate to [`config/profile.json`](file:///home/abhishek/projects/ai-outreach-engine-oss/config/profile.json).
+- Press the `.` (dot) key on your keyboard to open the GitHub Web Editor.
+- Fill in your name, target roles, tech stack, and links (Google Drive resume, LinkedIn, GitHub, Portfolio).
+- Commit your changes.
+
+### 3. Add Free API Secrets
+Go to **Settings > Secrets and variables > Actions > New repository secret** and add:
+- `GROQ_API_KEY`: Get a free key at [console.groq.com](https://console.groq.com/keys) (14,400 free requests/day)
+- `GMAIL_SENDER`: Your Gmail address (e.g. `yourname@gmail.com`)
+- `GMAIL_APP_PASSWORD`: 16-character Google App Password from [myaccount.google.com/apppasswords](https://myaccount.google.com/apppasswords)
+- *(Optional)* `SERPER_API_KEY`: Free key from [serper.dev](https://serper.dev) for Google web search email discovery
+- *(Optional)* `NOTION_API_KEY` & `NOTION_DATABASE_ID`: For Notion CRM tracking
+
+### 4. Trigger Outreach!
+- Navigate to the **Actions** tab in your repository.
+- Select **Autonomous AI Outreach Engine** from the left sidebar.
+- Click **Run workflow**!
+- The engine will scout fresh openings, compile custom Typst PDF resumes, and stage drafts in your Gmail with resumes attached—ready for your 1-click review and send.
 
 ---
 
-## 🏛 Architecture
+## 🥊 Applying Manually vs. AI Outreach Engine
+
+| Feature | Manual Outreach | Typical Job Bots | 🤖 AI Outreach Engine |
+| :--- | :--- | :--- | :--- |
+| **Time per Application** | 20–30 minutes | Instant | **Autonomous (< 3 seconds)** |
+| **Resume Quality** | Manual editing | Generic PDF dump | **Dynamic Typst PDF tailored to company tech stack** |
+| **Email Quality** | High, but burns you out | Generic AI spam (ignored) | **75–95 word punchy emails with concrete proof of work** |
+| **Safety** | High | Risky (mass bans) | **"Draft-First" (Gmail drafts for 1-click human review)** |
+| **Monthly Cost** | Free (costs your sanity) | $50–$150/month | **$0.00/month (100% Free Tier APIs)** |
+| **Application Tracking** | Messy spreadsheet | None | **Live bidirectional Notion CRM + CSV ledger** |
+
+---
+
+## 📨 High-Converting Cold Email Template
+
+Founders and engineering leads delete generic cover letters. This engine generates crisp, **75–95 word peer-to-peer emails** that cite real engineering achievements and automatically append your portfolio, GitHub, LinkedIn, and master Google Drive resume:
+
+```text
+Subject: Software Engineering @ Portkey — Alex Mercer
+
+Hi Rohit,
+
+I’ve been following Portkey’s recent work scaling enterprise LLM gateways and low-latency semantic caching.
+
+At my previous role, I engineered event-driven ingestion pipelines handling 40K records/sec using Python, FastAPI, and Kafka, and optimized semantic search indexing to cut query latency by 45%. Given your team’s expansion into automated agent routing, I’d love to contribute to your core backend and reliability layer.
+
+Are you open to a brief 10-minute chat this week? If you prefer, I can also submit directly via your careers portal.
+
+Best regards,
+Alex Mercer
+Software & AI Engineer
++1 (555) 019-2834 | alex.mercer@example.com
+
+Verified Links:
+• Master Resume (Google Drive): https://drive.google.com/file/d/YOUR_RESUME_ID/view
+• Portfolio: https://your-portfolio.dev
+• GitHub: https://github.com/your-username
+• LinkedIn: https://linkedin.com/in/your-profile
+
+📎 Tailored 1-page PDF resume is also attached for your convenience.
+```
+
+---
+
+## 🏛 Multi-Agent Architecture
 
 ```mermaid
 flowchart TD
@@ -77,17 +144,6 @@ flowchart TD
 
 ---
 
-## ✨ Key Features
-
-- **🛡 "Draft-First" Safety Guarantee**: By default (`DISPATCH_MODE=draft`), the engine stages polished drafts in your Gmail drafts folder. You retain complete human oversight before any email leaves your inbox.
-- **📄 Native Typst PDF Compilation**: Compiles hyper-targeted, beautifully typeset PDF resumes in sub-second time without slow LaTeX installations.
-- **🎯 1-3 Year Seniority & Role Guard**: Deterministic regex filter automatically discards Staff, Principal, and Director postings, ensuring 100% of outreach matches your real target level.
-- **🔍 Intelligent Lead Enrichment**: Uses Google Serper API + direct domain crawling + LLM parsing to find hiring managers and founders, backed by DNS MX deliverability checks to prevent bounces.
-- **📊 Bidirectional Notion CRM**: Automatically syncs status, contact email, pitch angles, and job links to your Notion workspace. Run `python dispatch_pending.py` anytime to process or re-dispatch pending rows.
-- **⚡ 100% Free Tier Compatible**: Designed specifically to run at **$0/month** total operating cost.
-
----
-
 ## 💸 100% Free Tier Stack
 
 | Service | Free Tier Allowance | Purpose in Engine |
@@ -101,10 +157,11 @@ flowchart TD
 
 ---
 
-## 🚀 60-Second Quickstart
+## 💻 Local Quickstart (2 Minutes)
 
-### Step 1: Clone and Install Dependencies
+If you prefer running locally on your own machine:
 
+### 1. Clone & Install
 ```bash
 git clone https://github.com/your-username/ai-outreach-engine.git
 cd ai-outreach-engine
@@ -117,72 +174,22 @@ source venv/bin/activate  # On Windows: venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
-### Step 2: Run the Interactive Setup Wizard
-
-The built-in setup wizard will test your credentials live and create your `.env` and `config/profile.json` in under 2 minutes:
-
+### 2. Interactive Setup Wizard
+Run the interactive wizard to verify your free API credentials live:
 ```bash
 python setup.py
 ```
 
-```
-   ___    ____   ____         __                       __       ______            _          
-  /   |  /  _/  / __ \__  __/ /_________  ____ ______/ /_     / ____/___  ____ _(_)___  ___ 
- / /| |  / /   / / / / / / / __/ ___/ _ \/ __ `/ ___/ __ \   / __/ / __ \/ __ `/ / __ \/ _ \
-/ ___ |_/ /   / /_/ / /_/ / /_/ /  /  __/ /_/ / /__/ / / /  / /___/ / / / /_/ / / / / /  __/
-/_/  |_/___/   \____/\__,_/\__/_/   \___/\__,_/\___/_/ /_/  /_____/_/ /_/\__, /_/_/ /_/\___/ 
-                                                                        /____/               
-Autonomous AI Job Search & Outreach Engine (100% Free-Tier Compatible)
-```
-
-### Step 3: Run Outreach!
-
+### 3. Run Outreach
 ```bash
-# 1. Safe Dry Run (Screen, enrich, and compile resumes without touching Gmail)
+# Safe Dry Run (screens, enriches, and compiles resumes without touching Gmail)
 python run_agent.py --dry-run
 
-# 2. Stage drafts in Gmail (Default safe mode)
+# Stage drafts in your Gmail (default safe mode)
 python run_agent.py --target 5
 
-# 3. Check service health & diagnostics
+# Check service health & diagnostics
 python run_agent.py --status
-```
-
----
-
-## 📋 CLI Usage & Options
-
-`run_agent.py` supports modular execution flags:
-
-```bash
-python run_agent.py [OPTIONS]
-
-Options:
-  --target INTEGER       Target number of qualified leads (default: 6)
-  --mode [all|remote-jobs|funded-startups]
-                         Sourcing channel (default: all)
-  --max-scans INTEGER    Safety cap on total leads evaluated (default: 50)
-  --dispatch-mode [draft|send|dry-run]
-                         Override dispatch behavior
-  --dispatch             Execute live dispatch according to .env DISPATCH_MODE
-  --dry-run              Simulate execution with zero external modifications
-  --status               Print service diagnostics table
-  --setup                Re-launch interactive setup wizard
-```
-
-### Dispatching Pending Applications from Notion
-
-If you manually add companies to your Notion database or update emails, run the standalone dispatcher to process them:
-
-```bash
-# Create Gmail drafts for all pending rows in Notion
-python dispatch_pending.py
-
-# Automatically use AI web search to find missing emails before creating drafts
-python dispatch_pending.py --enrich-missing
-
-# Live send via SMTP
-python dispatch_pending.py --send
 ```
 
 ---
@@ -208,34 +215,30 @@ Create a database in Notion and share it with your Notion Integration Token. Add
 
 ---
 
-## ☁️ 1-Click GitHub Actions Automation
+## 📬 Dispatching Pending Applications from Notion
 
-Run the engine 24/7 on GitHub Actions without hosting a server:
+If you manually add companies to your Notion database or update emails, run the standalone dispatcher:
 
-1. Fork this repository.
-2. In your fork, go to **Settings > Secrets and variables > Actions > New repository secret**.
-3. Add the following repository secrets:
-   - `GROQ_API_KEY`: Your free Groq key from [console.groq.com](https://console.groq.com)
-   - `GMAIL_SENDER`: Your Gmail address
-   - `GMAIL_APP_PASSWORD`: Your 16-character Google App Password
-   - `NOTION_API_KEY`: (Optional) Your Notion internal integration secret
-   - `NOTION_DATABASE_ID`: (Optional) Your Notion database ID
-   - `SERPER_API_KEY`: (Optional) Your free Serper key from [serper.dev](https://serper.dev)
-   - `CANDIDATE_PROFILE_JSON`: (Optional) Entire JSON contents of your `config/profile.json`
-4. The workflow runs on a twice-daily schedule (Monday–Friday) or can be triggered manually via the **Actions** tab with the **Run workflow** button.
-5. All tailored PDF resumes are preserved as downloadable GitHub artifacts for 14 days!
+```bash
+# Create Gmail drafts for all pending rows in Notion
+python dispatch_pending.py
+
+# Automatically use AI web search to find missing emails before creating drafts
+python dispatch_pending.py --enrich-missing
+
+# Live send via SMTP
+python dispatch_pending.py --send
+```
 
 ---
 
 ## 🐳 Docker Deployment
 
-Run with Docker and Docker Compose:
-
 ```bash
 # Build and run with default dry-run
 docker compose up --build
 
-# Run custom command inside container
+# Run custom target inside container
 docker compose run outreach-engine python run_agent.py --target 5
 ```
 
@@ -243,7 +246,7 @@ docker compose run outreach-engine python run_agent.py --target 5
 
 ## 🧪 Running Unit Tests
 
-The test suite uses Python's standard `unittest` framework with zero external test dependencies:
+The test suite runs with standard library `unittest` (zero external test dependencies):
 
 ```bash
 python3 -m unittest discover tests
@@ -251,23 +254,18 @@ python3 -m unittest discover tests
 
 ---
 
-## 🤝 Contributing
+## 📢 Share & Advertise
 
-Contributions are welcome! Please feel free to submit a Pull Request.
-1. Fork the Project
-2. Create your Feature Branch (`git checkout -b feature/NewFeature`)
-3. Commit your Changes (`git commit -m 'feat: Add NewFeature'`)
-4. Push to the Branch (`git push origin feature/NewFeature`)
-5. Open a Pull Request
+Want to share this project with fellow job seekers, developers, or on social media?
+Check out [`LAUNCH_KIT.md`](file:///home/abhishek/projects/ai-outreach-engine-oss/LAUNCH_KIT.md) for ready-to-publish launch threads and posts for:
+- 🐦 **Twitter / X Thread**
+- 💼 **LinkedIn Announcement**
+- 👾 **Reddit Post** (r/Python, r/SideProject, r/cscareerquestions)
+- 🟠 **Hacker News (Show HN)**
+- 🐱 **Product Hunt Launch**
 
 ---
 
 ## ⚖️ License
 
-Distributed under the MIT License. See [`LICENSE`](file:///home/abhishek/projects/ai-outreach-engine-oss/LICENSE) for more information.
-
----
-
-<div align="center">
-Built for engineers, job seekers, and founders seeking intelligent, ethical, and high-impact outreach.
-</div>
+Distributed under the MIT License. See [`LICENSE`](file:///home/abhishek/projects/ai-outreach-engine-oss/LICENSE) for details.

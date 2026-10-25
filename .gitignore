@@ -12,11 +12,10 @@ build/
 dist/
 *.egg-info/
 
-# Sensitive Environment Configurations & Profile
+# Sensitive Environment Configurations (.env is always private)
 .env
 .env.local
 .env.*.local
-config/profile.json
 
 # Generated Output & Resumes
 generated_resumes/
