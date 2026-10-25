@@ -1,7 +1,7 @@
 <div align="center">
 
 <p align="center">
-  <img src="assets/logo.svg" alt="ihateapplying" width="320">
+  <img src="docs/logo.svg" alt="ihateapplying" width="320">
 </p>
 
 # 🤖 Autonomous AI Outreach & Job Application Engine
