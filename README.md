@@ -286,7 +286,3 @@ Feel free to check the [issues page](https://github.com/abhishek09827/ihateapply
 If this project helps you in your job search or saves you hours of manual applications, please give it a ⭐ on GitHub!
 
 ---
-
-## ⚖️ License
-
-Distributed under the MIT License. See [`LICENSE`](file:///home/abhishek/projects/ai-outreach-engine-oss/LICENSE) for details.
