@@ -85,10 +85,14 @@ TARGET_STARTUPS_PATH = TEMPLATES_DIR / "target_startups.json"
 TEMPLATE_PATH = TEMPLATES_DIR / "resume_template.typ"
 
 # Load Candidate Profile
+LOCAL_PROFILE_PATH = BASE_DIR / "profile_context.json"
 PROFILE_PATH = CONFIG_DIR / "profile.json"
 PROFILE_EXAMPLE_PATH = CONFIG_DIR / "profile.example.json"
 
-if PROFILE_PATH.exists():
+if LOCAL_PROFILE_PATH.exists():
+    with open(LOCAL_PROFILE_PATH, "r", encoding="utf-8") as f:
+        MASTER_PROFILE = json.load(f)
+elif PROFILE_PATH.exists():
     with open(PROFILE_PATH, "r", encoding="utf-8") as f:
         MASTER_PROFILE = json.load(f)
 elif PROFILE_EXAMPLE_PATH.exists():
