@@ -10,7 +10,6 @@
 [![Outreach Mode](https://img.shields.io/badge/Dispatch-Direct_Send_%7C_Gmail_Drafts-red.svg)](#-dual-dispatch-modes-autopilot-or-draft-review)
 [![Typst Engine](https://img.shields.io/badge/Resume_Engine-Typst_0.11+-orange.svg)](https://typst.app/)
 [![Notion CRM](https://img.shields.io/badge/CRM-Notion_API-black.svg)](https://developers.notion.com/)
-[![Launch Kit](https://img.shields.io/badge/Marketing-Launch_Kit_Included-magenta.svg)](LAUNCH_KIT.md)
 
 [⚡ Fork & Run in 3 Min](#-fork--run-in-3-minutes-zero-coding-required) • [Dual Dispatch Modes](#-dual-dispatch-modes-autopilot-or-draft-review) • [Quickstart](#-local-quickstart-2-minutes) • [Email Template](#-high-converting-cold-email-template) • [Architecture](#-architecture) • [Free Tier Stack](#-100-free-tier-stack)
 
@@ -30,7 +29,7 @@ flowchart LR
     D --> E["🚀 Live Direct Send OR 📬 Reviewable Drafts"]
 ```
 
-### 1. Click [Fork](https://github.com/your-username/ai-outreach-engine/fork)
+### 1. Click [Fork](https://github.com/abhishek09827/ihateapplying/fork)
 Fork this repository to your personal GitHub account.
 
 ### 2. Update Your Profile (`config/profile.json`)
@@ -185,8 +184,8 @@ If you prefer running locally on your own machine:
 
 ### 1. Clone & Install
 ```bash
-git clone https://github.com/your-username/ai-outreach-engine.git
-cd ai-outreach-engine
+git clone https://github.com/abhishek09827/ihateapplying.git
+cd ihateapplying
 
 # Create virtual environment
 python3 -m venv venv
@@ -279,19 +278,15 @@ python3 -m unittest discover tests
 
 ---
 
-## 📢 Share & Advertise
+## 🤝 Contributing & Community
 
-Want to share this project with fellow job seekers, developers, or on social media?
-Check out [`LAUNCH_KIT.md`](file:///home/abhishek/projects/ai-outreach-engine-oss/LAUNCH_KIT.md) for ready-to-publish launch threads and posts for:
-- 🐦 **Twitter / X Thread**
-- 💼 **LinkedIn Announcement**
-- 👾 **Reddit Post** (r/Python, r/SideProject, r/cscareerquestions)
-- 🟠 **Hacker News (Show HN)**
-- 🐱 **Product Hunt Launch**
+Contributions, issues, and feature requests are welcome!
+Feel free to check the [issues page](https://github.com/abhishek09827/ihateapplying/issues) or submit a pull request.
+
+If this project helps you in your job search or saves you hours of manual applications, please give it a ⭐ on GitHub!
 
 ---
 
 ## ⚖️ License
 
 Distributed under the MIT License. See [`LICENSE`](file:///home/abhishek/projects/ai-outreach-engine-oss/LICENSE) for details.
-# ihateapplying

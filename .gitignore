@@ -17,6 +17,7 @@ dist/
 .env.local
 .env.*.local
 profile_context.json
+LAUNCH_KIT.md
 
 # Generated Output & Resumes
 generated_resumes/
