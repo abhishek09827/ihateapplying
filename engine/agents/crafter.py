@@ -29,13 +29,14 @@ class ApplicationCrafterAgent(BaseAgent):
 
         highlights_str = "\n".join([f"- {h}" for h in highlights[:3]])
         oss_str = "\n".join([f"- {o}" for o in open_source[:2]]) if open_source else ""
+        oss_section = f"Open Source / Key Projects:\n{oss_str}" if oss_str else ""
 
         concise_profile = f"""
 Candidate: {CANDIDATE_NAME} ({CANDIDATE_TITLE})
 Experience: {candidate.get('years_experience', '1-3 Years production experience')}
 Core Highlights:
 {highlights_str}
-{f'Open Source / Key Projects:\n{oss_str}' if oss_str else ''}
+{oss_section}
 """
 
         prompt = f"""You are the elite technical career agent for {CANDIDATE_NAME}.
