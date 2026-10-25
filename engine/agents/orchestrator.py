@@ -174,13 +174,13 @@ class OutreachOrchestrator:
         ))
 
         # Step 4: Agentic System Execution (Screener -> Enricher -> Crafter -> Dispatcher)
-        console.rule(f"[bold green]Phase 2: Agentic Pipeline Processing (Target: {target_qualified} qualified)[/bold green]")
+        console.rule(f"[bold green]Phase 2: Agentic Pipeline Processing (Target: {target_qualified} actionable applications with email)[/bold green]")
         total_evaluated = 0
 
         try:
             for lead in candidate_pool:
-                if report.qualified_count >= target_qualified:
-                    console.print(f"\n[bold green]🎯 Target goal reached: {report.qualified_count} qualified applications processed![/bold green]")
+                if report.contactable_count >= target_qualified:
+                    console.print(f"\n[bold green]🎯 Target goal reached: {report.contactable_count} actionable applications with email processed![/bold green]")
                     break
 
                 if total_evaluated >= max_scans:
@@ -211,7 +211,8 @@ class OutreachOrchestrator:
                 with console.status("  [bold green][LeadEnricher] Searching contact intelligence...[/bold green]"):
                     contact = self.enricher.enrich(lead)
 
-                email_display = f"[green]{contact.email}[/green]" if contact.email else "[yellow]No Direct Email Found[/yellow]"
+                has_email = bool(contact.email and contact.email.strip())
+                email_display = f"[green]{contact.email}[/green]" if has_email else "[yellow]No Direct Email Found (Will save to CRM & continue search)[/yellow]"
                 console.print(f"  [Enricher] Recipient: [bold]{contact.name}[/bold] ({contact.title}) | Email: {email_display}")
                 console.print(f"  [Enricher] Source: {contact.enrichment_source}")
 
@@ -224,8 +225,12 @@ class OutreachOrchestrator:
 
                 # Agent 5: Dispatcher
                 if dry_run:
-                    pkg.dispatch_status = "Dry Run (Verified)"
-                    console.print("  [Dispatcher] [yellow]DRY-RUN mode active: Skipping Gmail and Notion sync.[/yellow]")
+                    if has_email:
+                        pkg.dispatch_status = "Dry Run (Verified Email)"
+                        console.print("  [Dispatcher] [yellow]DRY-RUN mode active: Verified email present, skipping external dispatch.[/yellow]")
+                    else:
+                        pkg.dispatch_status = "Dry Run (Missing Email)"
+                        console.print("  [Dispatcher] [yellow]DRY-RUN mode active: No direct email found.[/yellow]")
                 else:
                     with console.status("  [bold blue][Dispatcher] Executing dispatch and Notion CRM sync...[/bold blue]"):
                         pkg = self.dispatcher.dispatch(pkg, override_mode=active_dispatch_mode)
@@ -235,6 +240,14 @@ class OutreachOrchestrator:
 
                 packages.append(pkg)
                 report.dispatched_count += 1
+
+                if has_email:
+                    report.contactable_count += 1
+                    console.print(f"  [bold green]✓ Actionable application {report.contactable_count}/{target_qualified} completed.[/bold green]")
+                else:
+                    report.missing_email_count += 1
+                    console.print(f"  [dim yellow]ℹ Saved qualified lead to CRM/ledger (no email). Continuing scan towards target goal ({report.contactable_count}/{target_qualified})...[/dim yellow]")
+
                 time.sleep(1)
 
         except Exception as e:
@@ -267,6 +280,7 @@ class OutreachOrchestrator:
         console.print(table)
         console.print(f"\nTotal Fresh Leads Sourced: [bold]{len(candidate_pool)}[/bold]")
         console.print(f"Applications Qualified: [bold green]{report.qualified_count}[/bold green] | Screened Out: [bold yellow]{report.screened_out_count}[/bold yellow]")
-        console.print(f"Applications Dispatched: [bold green]{report.dispatched_count}[/bold green] | Notion Synced: [bold green]{report.notion_synced_count}[/bold green]")
+        console.print(f"Actionable (With Email): [bold green]{report.contactable_count}[/bold green] | Missing Email: [bold yellow]{report.missing_email_count}[/bold yellow]")
+        console.print(f"Applications Dispatched/Logged: [bold green]{report.dispatched_count}[/bold green] | Notion Synced: [bold green]{report.notion_synced_count}[/bold green]")
 
         return report

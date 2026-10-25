@@ -51,6 +51,8 @@ class PipelineReport(BaseModel):
     funded_startups_count: int = 0
     screened_out_count: int = 0
     qualified_count: int = 0
+    contactable_count: int = 0
+    missing_email_count: int = 0
     dispatched_count: int = 0
     notion_synced_count: int = 0
     errors: List[str] = []
