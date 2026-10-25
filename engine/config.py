@@ -67,6 +67,8 @@ GMAIL_APP_PASSWORD = clean_str(os.getenv("GMAIL_APP_PASSWORD", "") or os.getenv(
 # Search & Enrichment Keys
 SERPER_API_KEY = clean_str(os.getenv("SERPER_API_KEY", ""))
 APOLLO_API_KEY = clean_str(os.getenv("APOLLO_API_KEY", ""))
+ADZUNA_APP_ID = clean_str(os.getenv("ADZUNA_APP_ID", ""))
+ADZUNA_APP_KEY = clean_str(os.getenv("ADZUNA_APP_KEY", ""))
 
 # Pipeline Parameters
 DISPATCH_MODE = clean_str(os.getenv("DISPATCH_MODE", "GMAIL_DRAFT")).upper()
@@ -131,6 +133,8 @@ class AppConfig:
     gmail_sender: str = GMAIL_USER or clean_str(os.getenv("GMAIL_SENDER", ""))
     gmail_app_password: str = GMAIL_APP_PASSWORD
     serper_api_key: str = SERPER_API_KEY
+    adzuna_app_id: str = ADZUNA_APP_ID
+    adzuna_app_key: str = ADZUNA_APP_KEY
     dispatch_mode: str = DISPATCH_MODE
     target_qualified: int = TARGET_QUALIFIED
     max_scans: int = MAX_SCANS
@@ -157,6 +161,8 @@ def load_config() -> AppConfig:
     groq_api_key = clean_str(os.getenv("GROQ_API_KEY", "")) or GROQ_API_KEY
     openrouter_api_key = clean_str(os.getenv("OPENROUTER_API_KEY", "")) or OPENROUTER_API_KEY
     serper_api_key = clean_str(os.getenv("SERPER_API_KEY", "")) or SERPER_API_KEY
+    adzuna_app_id = clean_str(os.getenv("ADZUNA_APP_ID", "")) or ADZUNA_APP_ID
+    adzuna_app_key = clean_str(os.getenv("ADZUNA_APP_KEY", "")) or ADZUNA_APP_KEY
     dispatch_mode = clean_str(os.getenv("DISPATCH_MODE", "")).upper() or DISPATCH_MODE
     dry_run = clean_str(os.getenv("DRY_RUN", "")).lower() in ("true", "1", "yes") if os.getenv("DRY_RUN") is not None else DRY_RUN
 
@@ -169,6 +175,8 @@ def load_config() -> AppConfig:
         gmail_sender=gmail_sender,
         gmail_app_password=gmail_app_password,
         serper_api_key=serper_api_key,
+        adzuna_app_id=adzuna_app_id,
+        adzuna_app_key=adzuna_app_key,
         dispatch_mode=dispatch_mode,
         target_qualified=TARGET_QUALIFIED,
         max_scans=MAX_SCANS,

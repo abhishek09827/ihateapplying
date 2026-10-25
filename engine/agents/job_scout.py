@@ -1,5 +1,7 @@
+import os
 import re
 import logging
+import xml.etree.ElementTree as ET
 from typing import List, Dict, Any, Optional, Set
 import requests
 from bs4 import BeautifulSoup
@@ -46,19 +48,31 @@ class JobScoutAgent(BaseAgent):
         except Exception as e:
             logger.error(f"Remotive fetch failed: {e}")
 
-        # Source 3: Jobicy (Python, Data-Science, Engineering, Backend)
+        # Source 3: We Work Remotely (WWR) RSS category feeds
+        try:
+            add_leads(self._fetch_weworkremotely(limit=per_source, seen=seen))
+        except Exception as e:
+            logger.error(f"WeWorkRemotely fetch failed: {e}")
+
+        # Source 4: Jobicy (Python, Data-Science, Engineering, Backend)
         try:
             add_leads(self._fetch_jobicy(limit=per_source, seen=seen))
         except Exception as e:
             logger.error(f"Jobicy fetch failed: {e}")
 
-        # Source 4: HN Who is Hiring (Monthly YC/HN Remote hiring thread)
+        # Source 5: HN Who is Hiring (Monthly YC/HN Remote hiring thread)
         try:
             add_leads(self._fetch_hn_who_is_hiring(limit=per_source, seen=seen))
         except Exception as e:
             logger.error(f"HN Who is Hiring fetch failed: {e}")
 
-        # Source 5: Arbeitnow (Multi-page global remote jobs)
+        # Source 6: Adzuna (Optional Developer API)
+        try:
+            add_leads(self._fetch_adzuna(limit=per_source, seen=seen))
+        except Exception as e:
+            logger.error(f"Adzuna fetch failed: {e}")
+
+        # Source 7: Arbeitnow (Multi-page global remote jobs)
         if len(leads) < limit:
             try:
                 add_leads(self._fetch_arbeitnow(limit=limit - len(leads), seen=seen, page_offset=page_offset))
@@ -367,5 +381,191 @@ class JobScoutAgent(BaseAgent):
                         return leads
             except Exception:
                 continue
+
+        return leads
+
+    def _fetch_weworkremotely(self, limit: int = 25, seen: Optional[Any] = None) -> List[JobLead]:
+        """
+        Fetches remote jobs from We Work Remotely (WWR) public RSS feeds.
+        Dynamically prioritizes category feeds matching candidate target roles,
+        and extracts company, role, location, description, and direct link.
+        """
+        from engine.config import MASTER_PROFILE
+        target_roles = [r.lower() for r in MASTER_PROFILE.get("candidate", MASTER_PROFILE).get("target_roles", [])]
+        seen_set = set(seen or set())
+
+        # Select relevant WWR category feeds based on target roles
+        category_feeds = []
+        if any("back" in r or "python" in r or "ai" in r or "data" in r for r in target_roles):
+            category_feeds.append("https://weworkremotely.com/categories/remote-back-end-programming-jobs.rss")
+        if any("full" in r or "software" in r for r in target_roles):
+            category_feeds.append("https://weworkremotely.com/categories/remote-full-stack-programming-jobs.rss")
+        if any("front" in r or "ui" in r or "web" in r for r in target_roles):
+            category_feeds.append("https://weworkremotely.com/categories/remote-front-end-programming-jobs.rss")
+        if any("devops" in r or "infra" in r or "cloud" in r or "sre" in r for r in target_roles):
+            category_feeds.append("https://weworkremotely.com/categories/remote-devops-sysadmin-jobs.rss")
+        if any("product" in r for r in target_roles):
+            category_feeds.append("https://weworkremotely.com/categories/remote-product-jobs.rss")
+        if any("design" in r for r in target_roles):
+            category_feeds.append("https://weworkremotely.com/categories/remote-design-jobs.rss")
+        if any("support" in r for r in target_roles):
+            category_feeds.append("https://weworkremotely.com/categories/remote-customer-support-jobs.rss")
+        if any("sales" in r or "marketing" in r for r in target_roles):
+            category_feeds.append("https://weworkremotely.com/categories/remote-sales-and-marketing-jobs.rss")
+        if any("manage" in r or "finance" in r for r in target_roles):
+            category_feeds.append("https://weworkremotely.com/categories/remote-management-and-finance-jobs.rss")
+
+        # Core fallback feeds
+        category_feeds.append("https://weworkremotely.com/categories/remote-programming-jobs.rss")
+        category_feeds.append("https://weworkremotely.com/remote-jobs.rss")
+
+        # Deduplicate while preserving order
+        feeds_to_fetch = list(dict.fromkeys(category_feeds))
+
+        leads: List[JobLead] = []
+        collected = set()
+
+        for feed_url in feeds_to_fetch:
+            if len(leads) >= limit:
+                break
+            try:
+                res = requests.get(feed_url, headers={"User-Agent": "Mozilla/5.0"}, timeout=8)
+                if res.status_code != 200:
+                    continue
+
+                root = ET.fromstring(res.content)
+                for item in root.findall(".//item"):
+                    raw_title = item.find("title").text if item.find("title") is not None else ""
+                    if not raw_title:
+                        continue
+
+                    # WWR formats title as 'Company: Role Title'
+                    if ":" in raw_title:
+                        parts = raw_title.split(":", 1)
+                        company = parts[0].strip()
+                        role = parts[1].strip()
+                    else:
+                        company = "Remote Tech"
+                        role = raw_title.strip()
+
+                    ck = company.lower()
+                    if not company or ck in seen_set or ck in collected:
+                        continue
+
+                    link = item.find("link").text if item.find("link") is not None else ""
+                    pub_date = item.find("pubDate").text if item.find("pubDate") is not None else ""
+                    ts = parse_date_to_timestamp(pub_date)
+
+                    desc_elem = item.find("description")
+                    desc_raw = desc_elem.text if desc_elem is not None and desc_elem.text else ""
+                    desc_clean = BeautifulSoup(desc_raw, "html.parser").get_text()[:3000]
+
+                    aligned, _ = is_profile_aligned(title=role, description=desc_clean)
+                    if not aligned:
+                        continue
+
+                    domain_guess = re.sub(r'[^a-zA-Z0-9]', '', company).lower() + ".com"
+
+                    region_elem = item.find("region")
+                    region = region_elem.text if region_elem is not None and region_elem.text else "Worldwide / Remote"
+
+                    lead = JobLead(
+                        company=company,
+                        domain=domain_guess,
+                        role=role,
+                        source_channel="WeWorkRemotely RSS",
+                        is_remote=True,
+                        location=region,
+                        url=link,
+                        description=desc_clean,
+                        published_at=pub_date,
+                        timestamp=ts
+                    )
+                    leads.append(lead)
+                    collected.add(ck)
+                    if len(leads) >= limit:
+                        break
+            except Exception as e:
+                logger.warning(f"Failed parsing WeWorkRemotely RSS {feed_url}: {e}")
+
+        return leads
+
+    def _fetch_adzuna(self, limit: int = 25, seen: Optional[Any] = None) -> List[JobLead]:
+        """
+        Fetches remote jobs from Adzuna API (https://developer.adzuna.com).
+        Requires ADZUNA_APP_ID and ADZUNA_APP_KEY. Gracefully skips if not configured.
+        """
+        from engine.config import ADZUNA_APP_ID, ADZUNA_APP_KEY, MASTER_PROFILE
+        app_id = ADZUNA_APP_ID or os.getenv("ADZUNA_APP_ID", "")
+        app_key = ADZUNA_APP_KEY or os.getenv("ADZUNA_APP_KEY", "")
+
+        if not app_id or not app_key:
+            return []
+
+        target_roles = MASTER_PROFILE.get("candidate", MASTER_PROFILE).get("target_roles", ["Software Engineer"])
+        search_terms = target_roles[:2] if target_roles else ["Software Engineer"]
+        seen_set = set(seen or set())
+        leads: List[JobLead] = []
+        collected = set()
+
+        for term in search_terms:
+            if len(leads) >= limit:
+                break
+            try:
+                query_param = requests.utils.quote(f"{term} remote")
+                url = (
+                    f"https://api.adzuna.com/v1/api/jobs/us/search/1"
+                    f"?app_id={app_id}&app_key={app_key}&results_per_page=25"
+                    f"&what={query_param}&content-type=application/json"
+                )
+                res = requests.get(url, headers={"User-Agent": "Mozilla/5.0"}, timeout=8)
+                if res.status_code != 200:
+                    logger.warning(f"Adzuna API returned status {res.status_code}: {res.text[:100]}")
+                    continue
+
+                data = res.json()
+                for item in data.get("results", []):
+                    title = item.get("title", "").strip()
+                    comp_info = item.get("company", {})
+                    company = (comp_info.get("display_name") if isinstance(comp_info, dict) else str(comp_info)).strip()
+                    ck = company.lower()
+                    if not company or ck in seen_set or ck in collected:
+                        continue
+
+                    desc_clean = BeautifulSoup(item.get("description", ""), "html.parser").get_text()[:3000]
+                    aligned, _ = is_profile_aligned(title=title, description=desc_clean)
+                    if not aligned:
+                        continue
+
+                    domain_guess = re.sub(r'[^a-zA-Z0-9]', '', company).lower() + ".com"
+                    loc_info = item.get("location", {})
+                    location = (loc_info.get("display_name") if isinstance(loc_info, dict) else "Remote") or "Remote"
+
+                    s_min = item.get("salary_min")
+                    s_max = item.get("salary_max")
+                    salary_str = f"${int(s_min):,} - ${int(s_max):,}" if s_min and s_max else None
+
+                    created = item.get("created", "")
+                    ts = parse_date_to_timestamp(created)
+
+                    lead = JobLead(
+                        company=company,
+                        domain=domain_guess,
+                        role=title,
+                        source_channel="Adzuna API",
+                        is_remote=True,
+                        location=location,
+                        url=item.get("redirect_url", ""),
+                        description=desc_clean,
+                        salary_raw=salary_str,
+                        published_at=created,
+                        timestamp=ts
+                    )
+                    leads.append(lead)
+                    collected.add(ck)
+                    if len(leads) >= limit:
+                        break
+            except Exception as e:
+                logger.error(f"Adzuna search failed for '{term}': {e}")
 
         return leads
