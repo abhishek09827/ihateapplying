@@ -1,0 +1,22 @@
+import unittest
+from engine.config import load_config, clean_uuid
+
+class TestConfig(unittest.TestCase):
+    def test_load_config_defaults(self):
+        cfg = load_config()
+        self.assertIsNotNone(cfg)
+        self.assertIsInstance(cfg.target_roles, list)
+        self.assertTrue(len(cfg.target_roles) > 0)
+        self.assertTrue(bool(cfg.candidate_name))
+
+    def test_clean_uuid(self):
+        uuid_raw = "12345678123412341234123456789abc"
+        cleaned = clean_uuid(uuid_raw)
+        self.assertEqual(cleaned, "12345678-1234-1234-1234-123456789abc")
+
+        url_raw = "https://notion.so/myworkspace/12345678123412341234123456789abc?v=123"
+        cleaned_from_url = clean_uuid(url_raw)
+        self.assertEqual(cleaned_from_url, "12345678-1234-1234-1234-123456789abc")
+
+if __name__ == "__main__":
+    unittest.main()

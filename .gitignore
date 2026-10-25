@@ -1,0 +1,34 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Environments & Packaging
+venv/
+env/
+ENV/
+.venv/
+build/
+dist/
+*.egg-info/
+
+# Sensitive Environment Configurations & Profile
+.env
+.env.local
+.env.*.local
+config/profile.json
+
+# Generated Output & Resumes
+generated_resumes/
+data/resumes/*.pdf
+*.pdf
+
+# Local State & Cache
+.api_offset.json
+.seen_companies.json
+
+# Logs & System
+*.log
+.DS_Store
+.vscode/
+.idea/

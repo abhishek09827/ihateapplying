@@ -1,0 +1,62 @@
+[
+  {
+    "company": "Langfuse",
+    "domain": "langfuse.com",
+    "role": "Applied AI / Open-Source Engineer",
+    "channel": "Target AI Startup",
+    "url": "https://langfuse.com",
+    "direct_email": "founders@langfuse.com",
+    "funding_info": "$4M Seed (Y Combinator)",
+    "description": "Open-source LLM engineering platform for observability, traces, evals, and prompt management."
+  },
+  {
+    "company": "Portkey AI",
+    "domain": "portkey.ai",
+    "role": "Applied AI / Agent Infrastructure Engineer",
+    "channel": "Target AI Startup",
+    "url": "https://portkey.ai",
+    "direct_email": "founders@portkey.ai",
+    "funding_info": "$3M Seed (Lightspeed)",
+    "description": "AI Gateway and guardrails platform helping enterprises route, cache, and validate LLM workflows reliably."
+  },
+  {
+    "company": "Inngest",
+    "domain": "inngest.com",
+    "role": "Backend / AI Workflow Engineer",
+    "channel": "Target AI Startup",
+    "url": "https://inngest.com",
+    "direct_email": "founders@inngest.com",
+    "funding_info": "$6M Series A (GGV)",
+    "description": "Durable execution engine for background workflows and AI agents with event-driven streaming."
+  },
+  {
+    "company": "Trigger.dev",
+    "domain": "trigger.dev",
+    "role": "Applied AI / Backend Engineer",
+    "channel": "Target AI Startup",
+    "url": "https://trigger.dev",
+    "direct_email": "founders@trigger.dev",
+    "funding_info": "$3M Seed (Y Combinator)",
+    "description": "Open-source background jobs and AI agent orchestration infrastructure with long-running tasks."
+  },
+  {
+    "company": "Helicone",
+    "domain": "helicone.ai",
+    "role": "AI Infrastructure / Data Engineer",
+    "channel": "Target AI Startup",
+    "url": "https://helicone.ai",
+    "direct_email": "founders@helicone.ai",
+    "funding_info": "Seed (Y Combinator)",
+    "description": "Open-source LLM observability and gateway platform handling high-throughput log ingestion and prompt evaluations."
+  },
+  {
+    "company": "Braintrust",
+    "domain": "braintrust.dev",
+    "role": "Applied AI / Evals Engineer",
+    "channel": "Target AI Startup",
+    "url": "https://braintrust.dev",
+    "direct_email": "founders@braintrust.dev",
+    "funding_info": "$36M Series A (Coatue, a16z)",
+    "description": "Enterprise-grade AI evaluation platform, automated dataset curation, and real-time LLM tracing."
+  }
+]

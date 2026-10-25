@@ -1,0 +1,28 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ai-outreach-engine"
+version = "1.0.0"
+description = "Autonomous multi-agent job search, resume compiler, lead enricher, and cold email outreach engine"
+readme = "README.md"
+authors = [{ name = "Open Source Community" }]
+license = { text = "MIT" }
+requires-python = ">=3.10"
+dependencies = [
+    "requests>=2.31.0",
+    "beautifulsoup4>=4.12.2",
+    "pydantic>=2.5.0",
+    "python-dotenv>=1.0.0",
+    "rich>=13.7.0",
+    "typst>=0.11.0",
+    "dnspython>=2.4.2",
+    "openai>=1.12.0",
+    "playwright>=1.40.0"
+]
+
+[project.scripts]
+outreach = "run_agent:main"
+outreach-setup = "setup:main"
+outreach-pending = "dispatch_pending:main"

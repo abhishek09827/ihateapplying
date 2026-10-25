@@ -1,0 +1,103 @@
+name: Autonomous AI Outreach Engine
+
+on:
+  schedule:
+    # Run twice daily at 09:00 UTC and 17:00 UTC (Monday - Friday)
+    - cron: "0 9,17 * * 1-5"
+  workflow_dispatch:
+    inputs:
+      target_applications:
+        description: "Number of qualified applications to target"
+        required: true
+        default: "5"
+      mode:
+        description: "Sourcing Mode"
+        required: true
+        default: "all"
+        type: choice
+        options:
+          - all
+          - remote-jobs
+          - funded-startups
+      dry_run:
+        description: "Run in Dry-Run mode (no emails sent, no Notion updates)"
+        required: true
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+jobs:
+  run-outreach:
+    name: Execute Outreach Cycle
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install System Dependencies & Fonts
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y fonts-liberation fonts-dejavu-core
+
+      - name: Install Python Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Configure Candidate Profile
+        run: |
+          # If CANDIDATE_PROFILE_JSON secret is set, write to config/profile.json
+          if [ -n "${{ secrets.CANDIDATE_PROFILE_JSON }}" ]; then
+            echo '${{ secrets.CANDIDATE_PROFILE_JSON }}' > config/profile.json
+            echo "Loaded candidate profile from repository secret."
+          elif [ ! -f "config/profile.json" ]; then
+            cp config/profile.example.json config/profile.json
+            echo "Using default profile.example.json template."
+          fi
+
+      - name: Execute Multi-Agent Pipeline
+        env:
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+          SERPER_API_KEY: ${{ secrets.SERPER_API_KEY }}
+          NOTION_API_KEY: ${{ secrets.NOTION_API_KEY }}
+          NOTION_DATABASE_ID: ${{ secrets.NOTION_DATABASE_ID }}
+          GMAIL_SENDER: ${{ secrets.GMAIL_SENDER }}
+          GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+          DISPATCH_MODE: ${{ secrets.DISPATCH_MODE || 'draft' }}
+        run: |
+          FLAGS="--mode ${{ github.event.inputs.mode || 'all' }} --target ${{ github.event.inputs.target_applications || '5' }}"
+          if [ "${{ github.event.inputs.dry_run }}" = "true" ]; then
+            FLAGS="$FLAGS --dry-run"
+          fi
+          python run_agent.py $FLAGS
+
+      - name: Upload Generated PDF Resumes
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: tailored-resumes
+          path: data/resumes/*.pdf
+          retention-days: 14
+
+      - name: Commit & Sync Deduplication Ledger
+        if: always()
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add data/cache/ data/applications.csv || true
+          if git diff --staged --quiet; then
+            echo "No new companies to record in ledger."
+          else
+            git commit -m "chore(ledger): record newly evaluated companies [skip ci]"
+            git push origin HEAD:${{ github.ref_name }} || echo "Push skipped"
+          fi

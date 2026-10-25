@@ -1,0 +1,51 @@
+{
+  "candidate": {
+    "name": "Alex Mercer",
+    "title": "AI & Systems Engineer",
+    "email": "alex.mercer@example.com",
+    "phone": "+1 (555) 019-2834",
+    "years_experience": "2 Years (Software Engineer at TechCorp, B.S. Computer Science)",
+    "current_salary": "$85,000 USD / year",
+    "minimum_target_salary": "$90,000 USD / year",
+    "remote_preference": "Remote (Worldwide, US, Europe Async)",
+    "target_roles": [
+      "AI Engineer",
+      "Applied AI Engineer",
+      "Founding AI Engineer",
+      "LLM Infrastructure Engineer",
+      "Backend Engineer (Python / AI)",
+      "Data Platform Engineer"
+    ],
+    "target_skills": [
+      "Python",
+      "FastAPI",
+      "LangChain",
+      "LangGraph",
+      "Kafka",
+      "PySpark",
+      "Docker",
+      "Kubernetes",
+      "PostgreSQL"
+    ],
+    "education": "B.S. in Computer Science, State University (2020 – 2024)",
+    "links": {
+      "github": "https://github.com/your-username",
+      "portfolio": "https://your-portfolio.dev",
+      "linkedin": "https://linkedin.com/in/your-profile",
+      "resume_drive": "https://drive.google.com/file/d/YOUR_RESUME_ID/view?usp=sharing"
+    }
+  },
+  "experience_highlights": [
+    "TechCorp (Software Engineer, 2024–Present): Built event-driven ingestion pipelines handling 40K records/sec with Kafka and FastAPI.",
+    "TechCorp: Designed LLM-powered telemetry agent utilizing LangGraph and pgvector for automated log diagnostics and incident triage.",
+    "CloudLabs (Intern, 2023): Developed serverless AWS Lambda and PySpark data validation pipelines reducing pipeline latency by 35%."
+  ],
+  "open_source": [
+    "LlamaIndex: Contributed prompt template optimization and semantic retrieval fixes.",
+    "FastAPI: Documentation and validation test suite enhancements."
+  ],
+  "flagship_projects": {
+    "AgentOps": "AgentOps (https://github.com/your-username/agentops) — Distributed agent orchestrator with Redis caching and OpenTelemetry tracing.",
+    "QueryFlow": "QueryFlow (https://github.com/your-username/queryflow) — Natural language to SQL query engine with semantic guardrails and sub-5ms cached latency."
+  }
+}

@@ -1,0 +1,17 @@
+version: "3.8"
+
+services:
+  outreach-engine:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: ai_outreach_engine
+    env_file:
+      - .env
+    volumes:
+      - ./data:/app/data
+      - ./config/profile.json:/app/config/profile.json:ro
+    environment:
+      - PYTHONUNBUFFERED=1
+    command: ["python", "run_agent.py", "--target", "5"]
+    restart: "no"
