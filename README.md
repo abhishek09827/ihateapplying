@@ -1,5 +1,9 @@
 <div align="center">
 
+<p align="center">
+  <img src="assets/logo.svg" alt="ihateapplying" width="320">
+</p>
+
 # 🤖 Autonomous AI Outreach & Job Application Engine
 
 **An open-source, multi-agent AI system that discovers hidden tech openings, screens for fit, enriches verified founder/recruiter emails, compiles tailored Typst PDF resumes, and either sends live emails autonomously or stages reviewable Gmail drafts—all running 100% on free-tier APIs.**
