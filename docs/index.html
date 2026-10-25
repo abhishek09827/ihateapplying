@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>ihateapplying — So you don’t have to</title>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,800&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+--bg:#f4f3ee;--bg2:#fff;--tx:#0b0b0c;--mu:#6b6b64;--bd:#d6d5cc;--ac:#c8ff3d;--on:#0b0b0c;--at:#3d5c00;color-scheme:light;
+--df:"Bricolage Grotesque",system-ui,-apple-system,"Segoe UI",sans-serif;--mo:"JetBrains Mono",ui-monospace,Menlo,monospace}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0b0b0c;--bg2:#151517;--tx:#f4f3ee;--mu:#8d8d86;--bd:#2a2a2d;--at:#c8ff3d;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#0b0b0c;--bg2:#151517;--tx:#f4f3ee;--mu:#8d8d86;--bd:#2a2a2d;--at:#c8ff3d;color-scheme:dark}
+html{scroll-behavior:smooth;height:auto}
+*{box-sizing:border-box;margin:0}
+body{background:var(--bg);color:var(--tx);font:17px/1.5 var(--df);overflow-x:hidden;-webkit-font-smoothing:antialiased}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:60;background:var(--bg)}
+.w{max-width:1200px;margin:0 auto;padding:0 24px}
+.mono{font-family:var(--mo);font-size:13px;letter-spacing:.02em}
+nav{position:sticky;top:env(safe-area-inset-top,0px);z-index:50;background:var(--bg);border-bottom:1px solid var(--bd)}
+nav .w{display:flex;justify-content:space-between;align-items:center;height:58px}
+.logo{font-family:var(--mo);font-weight:500;font-size:15px}.logo b{background:var(--ac);color:var(--on);padding:1px 6px;border-radius:4px}
+.btn{display:inline-block;padding:14px 26px;border-radius:99px;background:var(--ac);color:var(--on);font-weight:800;text-decoration:none;font-size:16px;transition:transform .25s,box-shadow .25s;border:2px solid var(--on)}
+.btn:hover{transform:translate(-3px,-3px);box-shadow:5px 5px 0 var(--on)}
+.btn.o{background:transparent;color:var(--tx);border-color:var(--tx)}.btn.o:hover{box-shadow:5px 5px 0 var(--tx)}
+.btn.s{padding:9px 18px;font-size:14px}
+.hero{padding:70px 0 40px}
+h1{font-weight:800;text-transform:uppercase;letter-spacing:-.045em;line-height:.88;font-size:clamp(56px,14vw,190px)}
+h1 s{text-decoration:none;position:relative;display:inline-block;color:var(--mu)}
+h1 s::after{content:"";position:absolute;left:-1%;right:-1%;top:52%;height:.11em;background:var(--ac);transform:scaleX(0);transform-origin:left;animation:strike .9s .9s cubic-bezier(.7,0,.2,1) forwards}
+@keyframes strike{to{transform:scaleX(1)}}
+h1 .hl{background:var(--ac);color:var(--on);padding:0 .12em;display:inline-block;transform:rotate(-1.5deg);animation:pop .6s 1.6s both cubic-bezier(.3,1.6,.5,1)}
+@keyframes pop{from{opacity:0;transform:rotate(-1.5deg) scale(.7)}}
+.row{display:grid;grid-template-columns:1.1fr .9fr;gap:40px;margin-top:44px;align-items:center}
+.sub{font-size:clamp(19px,2.2vw,25px);max-width:480px;line-height:1.35}
+.sub em{font-style:normal;color:var(--at);font-weight:800}
+.cta{display:flex;gap:12px;flex-wrap:wrap;margin-top:28px}
+.cnt{margin-top:26px;color:var(--mu)}.cnt b{font-family:var(--mo);color:var(--at);font-size:15px}
+.inbox{position:relative;height:290px}
+.mail{position:absolute;left:0;right:0;background:var(--bg2);border:2px solid var(--tx);border-radius:16px;padding:16px 18px;opacity:0;animation:mail 9s infinite;box-shadow:6px 6px 0 var(--tx)}
+.mail:nth-child(1){top:0;animation-delay:0s}.mail:nth-child(2){top:96px;animation-delay:3s;margin-left:26px}.mail:nth-child(3){top:192px;animation-delay:6s;margin-left:52px}
+@keyframes mail{0%{opacity:0;transform:translateX(60px)}6%,30%{opacity:1;transform:none}36%,100%{opacity:0;transform:translateX(-30px)}}
+.mail .mono{color:var(--mu);display:block}.mail strong{display:block;font-size:17px;margin:3px 0 6px}
+.chip{display:inline-block;background:var(--ac);color:var(--on);font-family:var(--mo);font-size:12px;padding:3px 9px;border-radius:99px;font-weight:500}
+.mq{overflow:hidden;border-block:2px solid var(--tx);background:var(--ac);color:var(--on);padding:14px 0;margin:50px 0 0;transform:rotate(-1deg) scale(1.02)}
+.mq div{display:flex;width:max-content;animation:mq 26s linear infinite;font-weight:800;font-size:30px;text-transform:uppercase;letter-spacing:-.02em}
+.mq span{padding-right:34px;white-space:nowrap}
+@keyframes mq{to{transform:translateX(-50%)}}
+section{padding:110px 0 0}
+h2{font-size:clamp(38px,7vw,88px);line-height:.95;letter-spacing:-.04em;font-weight:800;text-transform:uppercase;max-width:900px}
+.k{color:var(--at);margin-bottom:16px;display:block}
+.steps{margin-top:50px;border-top:2px solid var(--tx)}
+.st{display:grid;grid-template-columns:80px 1fr 1fr;gap:20px;align-items:center;padding:26px 14px;border-bottom:1px solid var(--bd);transition:background .3s,color .3s,padding .3s;cursor:default}
+.st:hover{background:var(--ac);color:var(--on);padding-left:30px}
+.st:hover .mono,.st:hover p{color:var(--on)}
+.st h3{font-size:clamp(28px,4.5vw,52px);letter-spacing:-.03em;text-transform:uppercase;line-height:1}
+.st p{color:var(--mu)}
+.nums{display:grid;grid-template-columns:repeat(4,1fr);margin-top:50px;border:2px solid var(--tx)}
+.num{padding:34px 22px;border-right:2px solid var(--tx)}.num:last-child{border:0}
+.num strong{display:block;font-size:clamp(46px,7vw,92px);letter-spacing:-.05em;line-height:1;font-weight:800}
+.num span{color:var(--mu);font-size:15px}
+.modes{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:50px}
+.mode{border:2px solid var(--tx);border-radius:20px;padding:30px;min-height:230px;display:flex;flex-direction:column;justify-content:space-between;transition:transform .3s,background .3s,color .3s;background:var(--bg2)}
+.mode:hover{background:var(--ac);color:var(--on);transform:rotate(-1.5deg) translateY(-6px)}
+.mode:hover .mono{color:var(--on)}
+.mode .mono{color:var(--mu)}.mode h3{font-size:36px;letter-spacing:-.03em;text-transform:uppercase;line-height:1}
+.mode p{margin-top:8px}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:50px}
+.vs>div{border:2px solid var(--tx);border-radius:24px;padding:34px}
+.vs .new{background:var(--ac);color:var(--on);box-shadow:8px 8px 0 var(--tx)}
+.vs h3{font-family:var(--mo);font-size:13px;font-weight:500;text-transform:uppercase;letter-spacing:.08em;margin-bottom:18px;opacity:.7}
+.vs li{list-style:none;font-size:clamp(20px,2.4vw,28px);font-weight:800;letter-spacing:-.02em;padding:12px 0;border-bottom:1px solid color-mix(in srgb,currentColor 25%,transparent)}
+.vs .old li{color:var(--mu);text-decoration:line-through;text-decoration-thickness:2px}
+.stack{display:flex;flex-wrap:wrap;gap:10px;margin-top:30px}
+.stack span{border:2px solid var(--tx);border-radius:99px;padding:8px 18px;font-family:var(--mo);font-size:14px;transition:.2s}
+.stack span:hover{background:var(--ac);color:var(--on);transform:translateY(-4px)}
+.fin{margin-top:130px;background:var(--ac);color:var(--on);padding:100px 0;text-align:center;border-block:2px solid var(--tx)}
+.fin h2{margin:0 auto 34px;max-width:1000px}
+.fin .btn{background:var(--on);color:var(--ac);border-color:var(--on);font-size:19px;padding:18px 36px}
+.fin .btn:hover{box-shadow:6px 6px 0 var(--bg)}
+footer{padding:30px 0 50px;color:var(--mu);text-align:center}
+.rv{opacity:0;transform:translateY(40px);transition:opacity .7s ease,transform .7s cubic-bezier(.2,.8,.2,1)}
+.rv.in{opacity:1;transform:none}
+@media (max-width:820px){.row{grid-template-columns:1fr}.inbox{height:270px}.st{grid-template-columns:44px 1fr}.st p{grid-column:2}.nums{grid-template-columns:1fr 1fr}.num:nth-child(2){border-right:0}.num:nth-child(-n+2){border-bottom:2px solid var(--tx)}.modes,.vs{grid-template-columns:1fr}.mq div{font-size:22px}section{padding-top:80px}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}.rv{opacity:1;transform:none}h1 s::after{transform:none}.mail{opacity:1;position:relative;margin:0 0 12px!important;top:auto!important}.inbox{height:auto}}
+</style>
+</head>
+<body>
+<nav><div class="w"><div class="logo">i<b>hate</b>applying</div><a class="btn s" href="https://github.com/abhishek09827/ihateapplying">Star on GitHub</a></div></nav>
+
+<header class="hero"><div class="w">
+<h1>I hate<br><s>applying.</s><br><span class="hl">So don’t.</span></h1>
+<div class="row">
+<div>
+<p class="sub">An AI crew that finds the role, finds the founder, and writes the email. <em>You just read the replies.</em></p>
+<div class="cta"><a class="btn" href="https://github.com/abhishek09827/ihateapplying">Get it free →</a><a class="btn o" href="#how">How it works</a></div>
+<p class="cnt mono">Applications you didn’t write: <b id="c">0</b></p>
+</div>
+<div class="inbox" aria-hidden="true">
+<div class="mail"><span class="mono">To: Founder · AI infra seed startup</span><strong>Backend role — your LLM gateway</strong><span class="chip">resume attached</span></div>
+<div class="mail"><span class="mono">To: Eng lead · Devtools Series A</span><strong>Reliability work, with proof</strong><span class="chip">email verified</span></div>
+<div class="mail"><span class="mono">To: CTO · Data platform startup</span><strong>10-minute chat this week?</strong><span class="chip">draft ready</span></div>
+</div>
+</div>
+</div></header>
+
+<div class="mq" aria-hidden="true"><div id="mq"></div></div>
+
+<section id="how"><div class="w">
+<span class="k mono rv">/ the pipeline</span>
+<h2 class="rv">Five steps. Zero effort.</h2>
+<div class="steps">
+<div class="st rv"><span class="mono">01</span><h3>Discover</h3><p>Hidden openings, before they hit the crowd.</p></div>
+<div class="st rv"><span class="mono">02</span><h3>Screen</h3><p>Only real fits make the cut.</p></div>
+<div class="st rv"><span class="mono">03</span><h3>Find</h3><p>The right human, with a verified inbox.</p></div>
+<div class="st rv"><span class="mono">04</span><h3>Tailor</h3><p>A short pitch and a resume built for them.</p></div>
+<div class="st rv"><span class="mono">05</span><h3>Deliver</h3><p>Sent or staged. Tracked automatically.</p></div>
+</div></div></section>
+
+<section><div class="w">
+<span class="k mono rv">/ by the numbers</span>
+<div class="nums rv">
+<div class="num"><strong data-n="3" data-p="&lt;" data-s="s">0</strong><span>per application</span></div>
+<div class="num"><strong data-n="0" data-p="$" data-s="">0</strong><span>to run it</span></div>
+<div class="num"><strong data-n="20" data-p="" data-s="×">0</strong><span>wider funnel</span></div>
+<div class="num"><strong data-n="100" data-p="" data-s="%">0</strong><span>emails verified</span></div>
+</div></div></section>
+
+<section><div class="w">
+<span class="k mono rv">/ your call</span>
+<h2 class="rv">Autopilot or hands on.</h2>
+<div class="modes">
+<div class="mode rv"><span class="mono">MODE 01</span><div><h3>Send</h3><p>Fully autonomous, safely paced.</p></div></div>
+<div class="mode rv"><span class="mono">MODE 02</span><div><h3>Draft</h3><p>You review. You press send.</p></div></div>
+<div class="mode rv"><span class="mono">MODE 03</span><div><h3>Dry run</h3><p>Test it. Nothing leaves.</p></div></div>
+</div></div></section>
+
+<section><div class="w">
+<span class="k mono rv">/ before &amp; after</span>
+<h2 class="rv">Retire the grind.</h2>
+<div class="vs rv">
+<ul class="old"><h3>The old way</h3><li>Hours of copy-paste</li><li>Bots that get you banned</li><li>A spreadsheet of shame</li><li>$50–150 a month</li></ul>
+<ul class="new"><h3>ihateapplying</h3><li>Seconds, tailored</li><li>Verified before send</li><li>Live Notion tracker</li><li>$0. Free tiers only.</li></ul>
+</div>
+<div class="stack rv"><span>Groq</span><span>OpenRouter</span><span>Serper</span><span>Gmail</span><span>Notion</span><span>GitHub Actions</span><span>Typst</span></div>
+</div></section>
+
+<div class="fin"><div class="w">
+<h2 class="rv">Fork it. Forget it.</h2>
+<a class="btn rv" href="https://github.com/abhishek09827/ihateapplying">Open on GitHub →</a>
+</div></div>
+<footer class="mono">MIT licensed · built for people who’d rather build</footer>
+
+<script>
+(function(){
+var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target)}})},{threshold:.12});
+document.querySelectorAll('.rv').forEach(function(el,i){el.style.transitionDelay=(i%3)*.08+'s';io.observe(el)});
+var so=new IntersectionObserver(function(es){es.forEach(function(e){if(!e.isIntersecting)return;so.unobserve(e.target);var el=e.target,n=+el.dataset.n,p=el.dataset.p||'',s=el.dataset.s||'',t0=performance.now();
+(function f(t){var k=Math.min((t-t0)/1300,1),v=Math.round(n*(1-Math.pow(1-k,3)));el.innerHTML=p+v+s;if(k<1)requestAnimationFrame(f)})(t0)})},{threshold:.6});
+document.querySelectorAll('[data-n]').forEach(function(el){so.observe(el)});
+var w=['Find','Screen','Verify','Tailor','Send'],h='';for(var i=0;i<8;i++)w.forEach(function(x){h+='<span>'+x+' ✦</span>'});
+document.getElementById('mq').innerHTML=h;
+var c=document.getElementById('c'),n=0;
+setInterval(function(){n+=1+Math.floor(Math.random()*3);c.textContent=n.toLocaleString()},900);
+})();
+</script>
+</body>
+</html>
