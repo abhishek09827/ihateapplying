@@ -63,17 +63,24 @@ class BaseAgent:
         """Determines active LLM provider based on config and available keys."""
         if LLM_PROVIDER in ("OPENROUTER", "GROQ"):
             return LLM_PROVIDER
-        if OPENROUTER_API_KEY:
-            return "OPENROUTER"
-        elif GROQ_API_KEY:
+        if GROQ_API_KEY:
             return "GROQ"
+        elif OPENROUTER_API_KEY:
+            return "OPENROUTER"
         else:
             logger.warning("No LLM API key found. Set either GROQ_API_KEY or OPENROUTER_API_KEY in .env")
             return "GROQ"
 
     def _init_client(self) -> Optional[OpenAI]:
         """Initializes OpenAI client configured for the active provider."""
-        if self.provider == "OPENROUTER" and OPENROUTER_API_KEY:
+        if self.provider == "GROQ" and GROQ_API_KEY:
+            return OpenAI(
+                base_url="https://api.groq.com/openai/v1",
+                api_key=GROQ_API_KEY,
+                timeout=18.0,
+                max_retries=1
+            )
+        elif self.provider == "OPENROUTER" and OPENROUTER_API_KEY:
             return OpenAI(
                 base_url="https://openrouter.ai/api/v1",
                 api_key=OPENROUTER_API_KEY,
@@ -83,13 +90,6 @@ class BaseAgent:
                     "HTTP-Referer": "https://github.com/ai-outreach-engine",
                     "X-Title": "AI Outreach Engine"
                 }
-            )
-        elif GROQ_API_KEY:
-            return OpenAI(
-                base_url="https://api.groq.com/openai/v1",
-                api_key=GROQ_API_KEY,
-                timeout=18.0,
-                max_retries=1
             )
         return None
 

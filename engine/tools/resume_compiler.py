@@ -19,13 +19,24 @@ from engine.config import (
 
 logger = logging.getLogger("ResumeCompiler")
 
+def sanitize_typst_text(text: str) -> str:
+    """Escapes literal characters (<, @) that trigger Typst syntax errors when in content mode."""
+    if not text:
+        return ""
+    # Escape bare < (e.g. <2ms, <100ms)
+    s = re.sub(r'<(?=[0-9a-zA-Z\s])(?![a-zA-Z0-9_\-:]+>)', r'\<', text)
+    # Escape bare @ when followed by alphanumeric domain (e.g. user@domain)
+    s = re.sub(r'@(?=[a-zA-Z0-9])', r'\@', s)
+    return s
+
 def get_candidate_contact_line() -> str:
     """Builds a formatted contact header line for Typst."""
     parts = []
     if CANDIDATE_PHONE:
         parts.append(CANDIDATE_PHONE)
     if CANDIDATE_EMAIL:
-        parts.append(f'#link("mailto:{CANDIDATE_EMAIL}")[{CANDIDATE_EMAIL}]')
+        clean_email_label = CANDIDATE_EMAIL.replace("@", r"\@")
+        parts.append(f'#link("mailto:{CANDIDATE_EMAIL}")[{clean_email_label}]')
     if LINKEDIN_URL:
         clean_li = LINKEDIN_URL.replace("https://", "").replace("http://", "").rstrip("/")
         parts.append(f'#link("{LINKEDIN_URL}")[{clean_li}]')
@@ -43,7 +54,7 @@ def build_experience_typst() -> str:
     highlights = MASTER_PROFILE.get("experience_highlights", [])
     if not highlights:
         return "Proven track record delivering reliable software and systems in production."
-    return "\n".join([f"- {h}" for h in highlights])
+    return sanitize_typst_text("\n".join([f"- {h}" for h in highlights]))
 
 def build_projects_typst() -> str:
     """Formats flagship projects into Typst markup."""
@@ -53,19 +64,19 @@ def build_projects_typst() -> str:
     lines = []
     for name, desc in projects.items():
         lines.append(f"- *{name}:* {desc}")
-    return "\n".join(lines)
+    return sanitize_typst_text("\n".join(lines))
 
 def build_skills_typst() -> str:
     """Formats technical skills into Typst markup."""
     skills = MASTER_PROFILE.get("candidate", {}).get("target_skills", [
         "Python", "FastAPI", "Kafka", "Docker", "Kubernetes", "PostgreSQL"
     ])
-    return ", ".join(skills)
+    return sanitize_typst_text(", ".join(skills))
 
 def build_education_typst() -> str:
     """Formats candidate education into Typst markup."""
     edu = MASTER_PROFILE.get("candidate", {}).get("education", "B.S. in Computer Science")
-    return f"- {edu}"
+    return sanitize_typst_text(f"- {edu}")
 
 def build_tailored_pdf(
     company: str,
@@ -83,7 +94,7 @@ def build_tailored_pdf(
     with open(TEMPLATE_PATH, "r", encoding="utf-8") as f:
         template = f.read()
 
-    formatted_bullets = "\n".join([f"- {b}" for b in bullets])
+    formatted_bullets = sanitize_typst_text("\n".join([f"- {b}" for b in bullets]))
     contact_line = get_candidate_contact_line()
     exp_markup = build_experience_typst()
     proj_markup = build_projects_typst()

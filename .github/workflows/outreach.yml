@@ -20,14 +20,14 @@ on:
           - remote-jobs
           - funded-startups
       dispatch_mode:
-        description: "Dispatch Mode"
+        description: "Dispatch Mode (send = live email, draft = Gmail drafts, dry-run = simulation)"
         required: true
         default: "send"
         type: choice
         options:
-          - send (Direct Live Send via Gmail SMTP)
-          - draft (Create Reviewable Gmail Drafts)
-          - dry-run (Simulate with Zero External Action)
+          - send
+          - draft
+          - dry-run
       dry_run:
         description: "Force Dry-Run (Overrides dispatch mode)"
         required: false
