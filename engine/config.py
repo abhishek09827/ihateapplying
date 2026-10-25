@@ -75,6 +75,16 @@ MAX_SCANS = int(os.getenv("MAX_SCANS", "50"))
 MIN_MATCH_SCORE = int(os.getenv("MIN_MATCH_SCORE", "65"))
 OUTREACH_MODE = clean_str(os.getenv("OUTREACH_MODE", "all")).lower()
 
+# ATS Boards Configuration (Greenhouse & Ashby / absyss)
+DEFAULT_GREENHOUSE_BOARDS = ["anthropic", "stripe", "figma", "databricks", "scaleai", "vercel", "cohere", "glean"]
+DEFAULT_ASHBY_ORGS = ["openai", "perplexity", "cursor", "modal", "braintrust", "supabase", "cohere", "linear", "replit", "inngest", "pinecone"]
+
+raw_gh = os.getenv("GREENHOUSE_BOARDS", "")
+GREENHOUSE_BOARDS = [b.strip().lower() for b in raw_gh.split(",") if b.strip()] if raw_gh else DEFAULT_GREENHOUSE_BOARDS
+
+raw_ash = os.getenv("ASHBY_ORGS", "")
+ASHBY_ORGS = [o.strip().lower() for o in raw_ash.split(",") if o.strip()] if raw_ash else DEFAULT_ASHBY_ORGS
+
 # Paths & Directories
 CONFIG_DIR = BASE_DIR / "config"
 TEMPLATES_DIR = BASE_DIR / "templates"
@@ -147,6 +157,8 @@ class AppConfig:
     portfolio_url: str = PORTFOLIO_URL
     github_url: str = GITHUB_URL
     linkedin_url: str = LINKEDIN_URL
+    greenhouse_boards: List[str] = field(default_factory=lambda: GREENHOUSE_BOARDS)
+    ashby_orgs: List[str] = field(default_factory=lambda: ASHBY_ORGS)
 
 def load_config() -> AppConfig:
     """Loads and returns an AppConfig instance with current environment and profile settings."""
@@ -159,6 +171,11 @@ def load_config() -> AppConfig:
     serper_api_key = clean_str(os.getenv("SERPER_API_KEY", "")) or SERPER_API_KEY
     dispatch_mode = clean_str(os.getenv("DISPATCH_MODE", "")).upper() or DISPATCH_MODE
     dry_run = clean_str(os.getenv("DRY_RUN", "")).lower() in ("true", "1", "yes") if os.getenv("DRY_RUN") is not None else DRY_RUN
+
+    raw_gh = os.getenv("GREENHOUSE_BOARDS", "")
+    gh_boards = [b.strip().lower() for b in raw_gh.split(",") if b.strip()] if raw_gh else GREENHOUSE_BOARDS
+    raw_ash = os.getenv("ASHBY_ORGS", "")
+    ash_orgs = [o.strip().lower() for o in raw_ash.split(",") if o.strip()] if raw_ash else ASHBY_ORGS
 
     return AppConfig(
         groq_api_key=groq_api_key,
@@ -182,6 +199,8 @@ def load_config() -> AppConfig:
         resume_drive_url=RESUME_DRIVE_URL,
         portfolio_url=PORTFOLIO_URL,
         github_url=GITHUB_URL,
-        linkedin_url=LINKEDIN_URL
+        linkedin_url=LINKEDIN_URL,
+        greenhouse_boards=gh_boards,
+        ashby_orgs=ash_orgs
     )
 

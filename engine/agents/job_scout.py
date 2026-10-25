@@ -46,19 +46,31 @@ class JobScoutAgent(BaseAgent):
         except Exception as e:
             logger.error(f"Remotive fetch failed: {e}")
 
-        # Source 3: Jobicy (Python, Data-Science, Engineering, Backend)
+        # Source 3: Ashby / absyss ATS Job Boards
+        try:
+            add_leads(self._fetch_ashby(limit=per_source, seen=seen))
+        except Exception as e:
+            logger.error(f"Ashby fetch failed: {e}")
+
+        # Source 4: Greenhouse ATS Job Boards
+        try:
+            add_leads(self._fetch_greenhouse(limit=per_source, seen=seen))
+        except Exception as e:
+            logger.error(f"Greenhouse fetch failed: {e}")
+
+        # Source 5: Jobicy (Python, Data-Science, Engineering, Backend)
         try:
             add_leads(self._fetch_jobicy(limit=per_source, seen=seen))
         except Exception as e:
             logger.error(f"Jobicy fetch failed: {e}")
 
-        # Source 4: HN Who is Hiring (Monthly YC/HN Remote hiring thread)
+        # Source 6: HN Who is Hiring (Monthly YC/HN Remote hiring thread)
         try:
             add_leads(self._fetch_hn_who_is_hiring(limit=per_source, seen=seen))
         except Exception as e:
             logger.error(f"HN Who is Hiring fetch failed: {e}")
 
-        # Source 5: Arbeitnow (Multi-page global remote jobs)
+        # Source 7: Arbeitnow (Multi-page global remote jobs)
         if len(leads) < limit:
             try:
                 add_leads(self._fetch_arbeitnow(limit=limit - len(leads), seen=seen, page_offset=page_offset))
@@ -367,5 +379,132 @@ class JobScoutAgent(BaseAgent):
                         return leads
             except Exception:
                 continue
+
+        return leads
+
+    def _fetch_greenhouse(self, limit: int = 25, seen: Optional[Any] = None) -> List[JobLead]:
+        """
+        Fetches active roles from Greenhouse job boards for target tech and AI companies.
+        Uses public unauthenticated boards API: https://boards-api.greenhouse.io/v1/boards/{board}/jobs?content=true
+        """
+        from engine.config import GREENHOUSE_BOARDS
+        seen_set = set(seen or set())
+        leads: List[JobLead] = []
+        collected = set()
+
+        for board in GREENHOUSE_BOARDS:
+            if len(leads) >= limit:
+                break
+            try:
+                url = f"https://boards-api.greenhouse.io/v1/boards/{board}/jobs?content=true"
+                res = requests.get(url, headers={"User-Agent": "Mozilla/5.0"}, timeout=6)
+                if res.status_code != 200:
+                    continue
+                data = res.json()
+                for job in data.get("jobs", []):
+                    title = job.get("title", "").strip()
+                    comp = (job.get("company_name") or board).strip()
+                    ck = comp.lower()
+                    if not comp or ck in seen_set or ck in collected:
+                        continue
+
+                    content_html = job.get("content", "")
+                    desc_text = BeautifulSoup(content_html, "html.parser").get_text()[:3000]
+
+                    aligned, _ = is_profile_aligned(title=title, description=desc_text)
+                    if not aligned:
+                        continue
+
+                    loc_data = job.get("location", {})
+                    location = (loc_data.get("name") if isinstance(loc_data, dict) else str(loc_data)) or "Remote"
+                    is_remote = "remote" in location.lower() or "remote" in title.lower() or "remote" in desc_text.lower()
+
+                    domain_guess = re.sub(r'[^a-zA-Z0-9]', '', comp).lower() + ".com"
+                    updated_at = job.get("updated_at") or job.get("first_published") or ""
+                    ts = parse_date_to_timestamp(updated_at)
+
+                    lead = JobLead(
+                        company=comp,
+                        domain=domain_guess,
+                        role=title,
+                        source_channel="Greenhouse Board API",
+                        is_remote=is_remote,
+                        location=location,
+                        url=job.get("absolute_url", ""),
+                        description=desc_text,
+                        published_at=str(updated_at),
+                        timestamp=ts
+                    )
+                    leads.append(lead)
+                    collected.add(ck)
+                    if len(leads) >= limit:
+                        break
+            except Exception as e:
+                logger.warning(f"Failed fetching Greenhouse board for '{board}': {e}")
+
+        return leads
+
+    def _fetch_ashby(self, limit: int = 25, seen: Optional[Any] = None) -> List[JobLead]:
+        """
+        Fetches active roles from Ashby (absyss) job boards for target tech and AI companies.
+        Uses public unauthenticated posting API: https://api.ashbyhq.com/posting-api/job-board/{org}?includeCompensation=true
+        """
+        from engine.config import ASHBY_ORGS
+        seen_set = set(seen or set())
+        leads: List[JobLead] = []
+        collected = set()
+
+        for org in ASHBY_ORGS:
+            if len(leads) >= limit:
+                break
+            try:
+                url = f"https://api.ashbyhq.com/posting-api/job-board/{org}?includeCompensation=true"
+                res = requests.get(url, headers={"User-Agent": "Mozilla/5.0"}, timeout=6)
+                if res.status_code != 200:
+                    continue
+                data = res.json()
+                for job in data.get("jobs", []):
+                    title = job.get("title", "").strip()
+                    comp = org.replace("-", " ").title()
+                    ck = comp.lower()
+                    if not comp or ck in seen_set or ck in collected:
+                        continue
+
+                    desc = job.get("descriptionPlain") or BeautifulSoup(job.get("descriptionHtml", ""), "html.parser").get_text()
+                    desc_text = desc[:3000]
+
+                    aligned, _ = is_profile_aligned(title=title, description=desc_text)
+                    if not aligned:
+                        continue
+
+                    loc = job.get("location") or "Remote"
+                    is_remote = bool(job.get("isRemote")) or "remote" in str(loc).lower()
+
+                    comp_data = job.get("compensation", {})
+                    salary_str = comp_data.get("compensationTierSummary") if isinstance(comp_data, dict) else None
+
+                    domain_guess = re.sub(r'[^a-zA-Z0-9]', '', comp).lower() + ".com"
+                    pub_date = job.get("publishedAt", "")
+                    ts = parse_date_to_timestamp(pub_date)
+
+                    lead = JobLead(
+                        company=comp,
+                        domain=domain_guess,
+                        role=title,
+                        source_channel="Ashby ATS API",
+                        is_remote=is_remote,
+                        location=str(loc),
+                        url=job.get("jobUrl") or job.get("applyUrl", ""),
+                        description=desc_text,
+                        salary_raw=salary_str,
+                        published_at=str(pub_date),
+                        timestamp=ts
+                    )
+                    leads.append(lead)
+                    collected.add(ck)
+                    if len(leads) >= limit:
+                        break
+            except Exception as e:
+                logger.warning(f"Failed fetching Ashby job board for '{org}': {e}")
 
         return leads
