@@ -57,10 +57,12 @@ GROQ_PRIMARY_MODEL = "openai/gpt-oss-120b"
 GROQ_FALLBACK_MODEL = "openai/gpt-oss-20b"
 
 # CRM & Email Credentials
-NOTION_TOKEN = clean_str(os.getenv("NOTION_TOKEN", ""))
+NOTION_TOKEN = clean_str(os.getenv("NOTION_TOKEN", "") or os.getenv("NOTION_API_KEY", ""))
+NOTION_API_KEY = NOTION_TOKEN
 NOTION_DATABASE_ID = clean_uuid(os.getenv("NOTION_DATABASE_ID", ""))
-GMAIL_USER = clean_str(os.getenv("GMAIL_USER", ""))
-GMAIL_APP_PASSWORD = clean_str(os.getenv("GMAIL_APP_PASSWORD", ""))
+GMAIL_USER = clean_str(os.getenv("GMAIL_USER", "") or os.getenv("GMAIL_SENDER", "") or os.getenv("EMAIL_USER", ""))
+GMAIL_SENDER = GMAIL_USER
+GMAIL_APP_PASSWORD = clean_str(os.getenv("GMAIL_APP_PASSWORD", "") or os.getenv("GMAIL_PASSWORD", "")).replace(" ", "")
 
 # Search & Enrichment Keys
 SERPER_API_KEY = clean_str(os.getenv("SERPER_API_KEY", ""))
@@ -148,5 +150,38 @@ class AppConfig:
 
 def load_config() -> AppConfig:
     """Loads and returns an AppConfig instance with current environment and profile settings."""
-    return AppConfig()
+    gmail_sender = clean_str(os.getenv("GMAIL_USER", "") or os.getenv("GMAIL_SENDER", "") or os.getenv("EMAIL_USER", "")) or GMAIL_USER
+    gmail_app_password = clean_str(os.getenv("GMAIL_APP_PASSWORD", "") or os.getenv("GMAIL_PASSWORD", "")).replace(" ", "") or GMAIL_APP_PASSWORD
+    notion_api_key = clean_str(os.getenv("NOTION_TOKEN", "") or os.getenv("NOTION_API_KEY", "")) or NOTION_TOKEN
+    notion_database_id = clean_uuid(os.getenv("NOTION_DATABASE_ID", "")) or NOTION_DATABASE_ID
+    groq_api_key = clean_str(os.getenv("GROQ_API_KEY", "")) or GROQ_API_KEY
+    openrouter_api_key = clean_str(os.getenv("OPENROUTER_API_KEY", "")) or OPENROUTER_API_KEY
+    serper_api_key = clean_str(os.getenv("SERPER_API_KEY", "")) or SERPER_API_KEY
+    dispatch_mode = clean_str(os.getenv("DISPATCH_MODE", "")).upper() or DISPATCH_MODE
+    dry_run = clean_str(os.getenv("DRY_RUN", "")).lower() in ("true", "1", "yes") if os.getenv("DRY_RUN") is not None else DRY_RUN
+
+    return AppConfig(
+        groq_api_key=groq_api_key,
+        openrouter_api_key=openrouter_api_key,
+        llm_provider=LLM_PROVIDER,
+        notion_api_key=notion_api_key,
+        notion_database_id=notion_database_id,
+        gmail_sender=gmail_sender,
+        gmail_app_password=gmail_app_password,
+        serper_api_key=serper_api_key,
+        dispatch_mode=dispatch_mode,
+        target_qualified=TARGET_QUALIFIED,
+        max_scans=MAX_SCANS,
+        min_match_score=MIN_MATCH_SCORE,
+        outreach_mode=OUTREACH_MODE,
+        dry_run=dry_run,
+        candidate_name=CANDIDATE_NAME,
+        candidate_title=CANDIDATE_TITLE,
+        candidate_email=gmail_sender or CANDIDATE_EMAIL,
+        candidate_phone=CANDIDATE_PHONE,
+        resume_drive_url=RESUME_DRIVE_URL,
+        portfolio_url=PORTFOLIO_URL,
+        github_url=GITHUB_URL,
+        linkedin_url=LINKEDIN_URL
+    )
 

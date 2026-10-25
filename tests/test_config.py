@@ -18,5 +18,20 @@ class TestConfig(unittest.TestCase):
         cleaned_from_url = clean_uuid(url_raw)
         self.assertEqual(cleaned_from_url, "12345678-1234-1234-1234-123456789abc")
 
+    def test_credential_aliases(self):
+        import os
+        from unittest.mock import patch
+        with patch.dict(os.environ, {
+            "GMAIL_USER": "",
+            "GMAIL_SENDER": "testuser@gmail.com",
+            "GMAIL_APP_PASSWORD": "abcd efgh ijkl mnop",
+            "NOTION_TOKEN": "",
+            "NOTION_API_KEY": "secret_notion_key_123"
+        }):
+            cfg = load_config()
+            self.assertEqual(cfg.gmail_sender, "testuser@gmail.com")
+            self.assertEqual(cfg.gmail_app_password, "abcdefghijklmnop")
+            self.assertEqual(cfg.notion_api_key, "secret_notion_key_123")
+
 if __name__ == "__main__":
     unittest.main()

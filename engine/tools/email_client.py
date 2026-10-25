@@ -88,7 +88,10 @@ def dispatch_cold_email(
     Dispatches cold email (Gmail Draft or Live SMTP).
     Enforces strict DNS email deliverability check and guarantees PDF resume attachment.
     """
-    if not GMAIL_USER or not GMAIL_APP_PASSWORD:
+    active_user = GMAIL_USER or os.getenv("GMAIL_USER") or os.getenv("GMAIL_SENDER") or os.getenv("EMAIL_USER") or ""
+    active_password = (GMAIL_APP_PASSWORD or os.getenv("GMAIL_APP_PASSWORD") or os.getenv("GMAIL_PASSWORD") or "").replace(" ", "")
+
+    if not active_user or not active_password:
         return False, "Gmail credentials not configured in .env"
 
     # 1. DNS Deliverability & Format Verification (Prevents emailing non-existent domains)
@@ -106,7 +109,7 @@ def dispatch_cold_email(
     mode = (override_mode or DISPATCH_MODE).upper()
 
     msg = EmailMessage()
-    msg["From"] = f"{CANDIDATE_NAME} <{GMAIL_USER}>"
+    msg["From"] = f"{CANDIDATE_NAME} <{active_user}>"
     msg["To"] = clean_email
     msg["Subject"] = subject.strip()
     formatted_body = format_email_body_with_links(body)
@@ -130,7 +133,7 @@ def dispatch_cold_email(
     try:
         if mode in ("GMAIL_SEND", "AUTO_SEND", "SEND"):
             with smtplib.SMTP_SSL("smtp.gmail.com", 465) as smtp:
-                smtp.login(GMAIL_USER, GMAIL_APP_PASSWORD)
+                smtp.login(active_user, active_password)
                 smtp.send_message(msg)
             # Safe throttle between live cold emails to prevent spam flags
             time.sleep(15)
@@ -138,7 +141,7 @@ def dispatch_cold_email(
         else:
             # GMAIL_DRAFT (Include \Draft \Seen flags so Gmail renders attachment chip properly)
             with imaplib.IMAP4_SSL("imap.gmail.com", 993) as imap:
-                imap.login(GMAIL_USER, GMAIL_APP_PASSWORD)
+                imap.login(active_user, active_password)
                 imap.append('"[Gmail]/Drafts"', r'(\Draft \Seen)', imaplib.Time2Internaldate(time.time()), msg.as_bytes())
             return True, "Draft Created in Gmail (PDF Attached)"
     except Exception as e:

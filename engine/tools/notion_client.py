@@ -11,16 +11,24 @@ logger = logging.getLogger("NotionClient")
 
 NOTION_VERSION = "2022-06-28"
 
+def get_notion_token() -> str:
+    return NOTION_TOKEN or os.getenv("NOTION_TOKEN") or os.getenv("NOTION_API_KEY") or ""
+
+def get_notion_db_id() -> str:
+    return clean_uuid(NOTION_DATABASE_ID or os.getenv("NOTION_DATABASE_ID") or "")
+
 def get_notion_headers() -> dict:
     return {
-        "Authorization": f"Bearer {NOTION_TOKEN}",
+        "Authorization": f"Bearer {get_notion_token()}",
         "Notion-Version": NOTION_VERSION,
         "Content-Type": "application/json"
     }
 
 def get_existing_notion_companies() -> Set[str]:
     """Retrieves list of company names already recorded in the Notion database."""
-    if not NOTION_TOKEN or not NOTION_DATABASE_ID:
+    token = get_notion_token()
+    db_id = get_notion_db_id()
+    if not token or not db_id:
         return set()
 
     db_id = clean_uuid(NOTION_DATABASE_ID)
@@ -60,10 +68,10 @@ def get_existing_notion_companies() -> Set[str]:
 
 def push_to_notion(pkg: ApplicationPackage) -> Tuple[bool, str]:
     """Pushes a processed application package to Notion CRM."""
-    if not NOTION_TOKEN or not NOTION_DATABASE_ID:
+    token = get_notion_token()
+    db_id = get_notion_db_id()
+    if not token or not db_id:
         return False, "Notion credentials not configured in .env"
-
-    db_id = clean_uuid(NOTION_DATABASE_ID)
     url = "https://api.notion.com/v1/pages"
 
     status_name = "Email Sent Live" if "Sent" in pkg.dispatch_status else ("Draft Created in Gmail" if "Draft" in pkg.dispatch_status else "To Review")
@@ -125,10 +133,10 @@ def fetch_pending_notion_applications() -> list:
     Fetches records from Notion CRM that need dispatching or email resolution.
     Returns list of dicts with page_id, company, role, email, status, and raw properties.
     """
-    if not NOTION_TOKEN or not NOTION_DATABASE_ID:
+    token = get_notion_token()
+    db_id = get_notion_db_id()
+    if not token or not db_id:
         return []
-
-    db_id = clean_uuid(NOTION_DATABASE_ID)
     url = f"https://api.notion.com/v1/databases/{db_id}/query"
     pending = []
 
@@ -205,7 +213,8 @@ def fetch_pending_notion_applications() -> list:
 
 def update_notion_page(page_id: str, properties: dict) -> Tuple[bool, str]:
     """Updates properties on an existing Notion page."""
-    if not NOTION_TOKEN or not page_id:
+    token = get_notion_token()
+    if not token or not page_id:
         return False, "Notion credentials or page_id missing"
 
     url = f"https://api.notion.com/v1/pages/{page_id}"
