@@ -63,10 +63,11 @@ jobs:
           pip install -r requirements.txt
 
       - name: Configure Candidate Profile
+        env:
+          PROFILE_SECRET: ${{ secrets.CANDIDATE_PROFILE_JSON }}
         run: |
-          # If CANDIDATE_PROFILE_JSON secret is set, write to config/profile.json
-          if [ -n "${{ secrets.CANDIDATE_PROFILE_JSON }}" ]; then
-            echo '${{ secrets.CANDIDATE_PROFILE_JSON }}' > config/profile.json
+          if [ -n "$PROFILE_SECRET" ]; then
+            echo "$PROFILE_SECRET" > config/profile.json
             echo "Loaded candidate profile from repository secret."
           elif [ ! -f "config/profile.json" ]; then
             cp config/profile.example.json config/profile.json
