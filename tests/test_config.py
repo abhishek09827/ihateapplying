@@ -33,5 +33,16 @@ class TestConfig(unittest.TestCase):
             self.assertEqual(cfg.gmail_app_password, "abcdefghijklmnop")
             self.assertEqual(cfg.notion_api_key, "secret_notion_key_123")
 
+    def test_ats_board_configs(self):
+        import os
+        from unittest.mock import patch
+        with patch.dict(os.environ, {
+            "GREENHOUSE_BOARDS": "anthropic,stripe,figma",
+            "ASHBY_ORGS": "openai,modal,perplexity"
+        }):
+            cfg = load_config()
+            self.assertEqual(cfg.greenhouse_boards, ["anthropic", "stripe", "figma"])
+            self.assertEqual(cfg.ashby_orgs, ["openai", "modal", "perplexity"])
+
 if __name__ == "__main__":
     unittest.main()
