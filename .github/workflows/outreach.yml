@@ -85,6 +85,10 @@ jobs:
           GMAIL_USER: ${{ secrets.GMAIL_USER || secrets.GMAIL_SENDER }}
           GMAIL_SENDER: ${{ secrets.GMAIL_SENDER || secrets.GMAIL_USER }}
           GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+          RESUME_DRIVE_URL: ${{ secrets.RESUME_DRIVE_URL || secrets.RESUME_URL || 'https://drive.google.com/file/d/18kbu7pKjkYbaVGCq50BTCSFxtznOFUAT/view?usp=sharing' }}
+          PORTFOLIO_URL: ${{ secrets.PORTFOLIO_URL || 'https://www.abhibuilds.work' }}
+          GITHUB_URL: ${{ secrets.GITHUB_URL || 'https://github.com/abhishek09827' }}
+          LINKEDIN_URL: ${{ secrets.LINKEDIN_URL || 'https://linkedin.com/in/abhishek-kaushik-0a6a16243' }}
           DISPATCH_MODE: ${{ secrets.DISPATCH_MODE || 'draft' }}
         run: |
           FLAGS="--mode ${{ github.event.inputs.mode || 'all' }} --target ${{ github.event.inputs.target_applications || '5' }}"

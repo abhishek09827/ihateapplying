@@ -111,7 +111,24 @@ CANDIDATE_PHONE = CANDIDATE_DATA.get("phone") or CANDIDATE_DATA.get("candidate_p
 CANDIDATE_EMAIL = CANDIDATE_DATA.get("email") or CANDIDATE_DATA.get("candidate_email", GMAIL_USER)
 
 CANDIDATE_LINKS = CANDIDATE_DATA.get("links", {})
-RESUME_DRIVE_URL = clean_str(os.getenv("RESUME_DRIVE_URL", CANDIDATE_LINKS.get("resume_drive") or CANDIDATE_LINKS.get("resume_google_drive", "")))
+
+def _resolve_resume_drive_url() -> str:
+    # 1. Environment variable check across common aliases
+    for key in ["RESUME_DRIVE_URL", "RESUME_URL", "DRIVE_RESUME_URL", "RESUME_LINK", "GOOGLE_DRIVE_RESUME"]:
+        val = clean_str(os.getenv(key, ""))
+        if val and "YOUR_GOOGLE_DRIVE_RESUME_ID" not in val and "YOUR_RESUME_ID" not in val and val.startswith("http"):
+            return val
+
+    # 2. Check profile links dictionary
+    for key in ["resume_drive", "resume_google_drive", "resume"]:
+        val = clean_str(CANDIDATE_LINKS.get(key, ""))
+        if val and "YOUR_GOOGLE_DRIVE_RESUME_ID" not in val and "YOUR_RESUME_ID" not in val and val.startswith("http"):
+            return val
+
+    # 3. Canonical verified fallback
+    return "https://drive.google.com/file/d/18kbu7pKjkYbaVGCq50BTCSFxtznOFUAT/view?usp=sharing"
+
+RESUME_DRIVE_URL = _resolve_resume_drive_url()
 PORTFOLIO_URL = clean_str(os.getenv("PORTFOLIO_URL", CANDIDATE_LINKS.get("portfolio", "")))
 GITHUB_URL = clean_str(os.getenv("GITHUB_URL", CANDIDATE_LINKS.get("github", "")))
 LINKEDIN_URL = clean_str(os.getenv("LINKEDIN_URL", CANDIDATE_LINKS.get("linkedin", "")))
@@ -179,7 +196,7 @@ def load_config() -> AppConfig:
         candidate_title=CANDIDATE_TITLE,
         candidate_email=gmail_sender or CANDIDATE_EMAIL,
         candidate_phone=CANDIDATE_PHONE,
-        resume_drive_url=RESUME_DRIVE_URL,
+        resume_drive_url=_resolve_resume_drive_url(),
         portfolio_url=PORTFOLIO_URL,
         github_url=GITHUB_URL,
         linkedin_url=LINKEDIN_URL
