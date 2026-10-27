@@ -37,11 +37,33 @@ def format_email_body_with_links(body: str) -> str:
     if not body:
         body = "Hi there,\n\nI am writing to express my strong interest in joining your team. I have attached my tailored resume for your review."
 
-    # Prevent duplicate appending if links are already present
-    if PORTFOLIO_URL and PORTFOLIO_URL in body and GITHUB_URL and GITHUB_URL in body:
+    drive_link = RESUME_DRIVE_URL if (RESUME_DRIVE_URL and "YOUR_GOOGLE_DRIVE_RESUME_ID" not in RESUME_DRIVE_URL and "YOUR_RESUME_ID" not in RESUME_DRIVE_URL) else "https://drive.google.com/file/d/18kbu7pKjkYbaVGCq50BTCSFxtznOFUAT/view?usp=sharing"
+
+    # 1. Self-healing: Replace any template placeholder drive IDs that might already be in the text
+    for placeholder in ["YOUR_GOOGLE_DRIVE_RESUME_ID", "YOUR_RESUME_ID", "YOUR_DRIVE_ID"]:
+        if placeholder in body:
+            body = re.sub(rf"https://drive\.google\.com/file/d/{placeholder}/view\?usp=sharing", drive_link, body)
+            body = body.replace(placeholder, "18kbu7pKjkYbaVGCq50BTCSFxtznOFUAT")
+
+    # 2. Check if links block is already present
+    has_portfolio = (PORTFOLIO_URL and PORTFOLIO_URL in body) or "abhibuilds.work" in body
+    has_github = (GITHUB_URL and GITHUB_URL in body) or "github.com/abhishek09827" in body
+    has_drive = "drive.google.com" in body
+
+    if has_portfolio and has_github:
+        if not has_drive:
+            # Inject Drive link into existing links block if omitted
+            if "Verified Links:" in body:
+                body = body.replace("Verified Links:\n", f"Verified Links:\n• Master Resume (Google Drive): {drive_link}\n")
+            elif "Links:" in body:
+                body = body.replace("Links:\n", f"Links:\n• Master Resume (Google Drive): {drive_link}\n")
+            elif "• Portfolio:" in body:
+                body = body.replace("• Portfolio:", f"• Master Resume (Google Drive): {drive_link}\n• Portfolio:")
+            else:
+                body += f"\n• Master Resume (Google Drive): {drive_link}"
         return body
 
-    # Clean off redundant signoffs from LLM generation
+    # 3. Clean off redundant signoffs from LLM generation
     signoff_patterns = [
         r"(?i)\n+best regards,?\s*([a-zA-Z\s]+)?$",
         r"(?i)\n+best,?\s*([a-zA-Z\s]+)?$",
@@ -54,8 +76,8 @@ def format_email_body_with_links(body: str) -> str:
         cleaned_body = re.sub(pat, "", cleaned_body).strip()
 
     links_block = []
-    if RESUME_DRIVE_URL:
-        links_block.append(f"• Master Resume (Google Drive): {RESUME_DRIVE_URL}")
+    if drive_link:
+        links_block.append(f"• Master Resume (Google Drive): {drive_link}")
     if PORTFOLIO_URL:
         links_block.append(f"• Portfolio: {PORTFOLIO_URL}")
     if GITHUB_URL:
