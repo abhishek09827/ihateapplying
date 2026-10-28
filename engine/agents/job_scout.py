@@ -7,6 +7,7 @@ from engine.agents.base import BaseAgent
 from engine.state import JobLead
 from engine.tools.date_utils import parse_date_to_timestamp
 from engine.tools.profile_matcher import is_profile_aligned
+from engine.tools.location_matcher import get_india_remote_priority, is_india_remote_eligible
 
 logger = logging.getLogger("JobScoutAgent")
 
@@ -65,13 +66,16 @@ class JobScoutAgent(BaseAgent):
             except Exception as e:
                 logger.error(f"Arbeitnow fetch failed: {e}")
 
-        # Sort all aggregated candidate leads by timestamp descending (LATEST FIRST)
-        leads.sort(key=lambda x: x.timestamp, reverse=True)
+        # Sort all aggregated candidate leads: India Remote & Worldwide first, then newest first
+        leads.sort(
+            key=lambda x: (get_india_remote_priority(x.location, x.description)[0], x.timestamp),
+            reverse=True
+        )
         return leads[:limit]
 
     def _fetch_remoteok(self, limit: int = 25, seen: Optional[Any] = None) -> List[JobLead]:
         headers = {"User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36"}
-        target_tags = ["ai", "python", "machine-learning", "backend", "data", "cloud"]
+        target_tags = ["ai", "python", "machine-learning", "backend", "data", "cloud", "apac"]
         seen_set = set(seen or set())
 
         raw_candidates = []

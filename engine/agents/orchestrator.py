@@ -21,6 +21,7 @@ from engine.config import (
 )
 from engine.tools.notion_client import get_existing_notion_companies
 from engine.tools.alerter import send_error_alert
+from engine.tools.location_matcher import get_india_remote_priority
 from engine.agents.job_scout import JobScoutAgent
 from engine.agents.startup_scout import FundedStartupAgent
 from engine.agents.screener import ScreenerAgent
@@ -163,12 +164,15 @@ class OutreachOrchestrator:
         except Exception as e:
             logger.error(f"Error during discovery phase: {e}")
 
-        # Step 3: Chronological Sorting (NEWEST / LATEST POSTED FIRST)
-        candidate_pool.sort(key=lambda x: x.timestamp, reverse=True)
+        # Step 3: Priority Sorting (India Remote & Worldwide FIRST, newest first within tier)
+        candidate_pool.sort(
+            key=lambda x: (get_india_remote_priority(x.location, x.description)[0], x.timestamp),
+            reverse=True
+        )
         console.print(Panel(
             f"[bold green]Funnel Sourcing Complete![/bold green]\n"
             f"Collected [bold]{len(candidate_pool)}[/bold] fresh candidates matching profile.\n"
-            f"Prioritized chronologically: [bold cyan]Latest postings evaluated first[/bold cyan].",
+            f"Prioritized by: [bold green]India Remote & Worldwide eligibility[/bold green] (Latest postings first within each tier).",
             title="Candidate Funnel Status",
             border_style="green"
         ))

@@ -3,6 +3,7 @@ from engine.agents.base import BaseAgent
 from engine.state import JobLead, FitEvaluation
 from engine.config import MIN_MATCH_SCORE, MASTER_PROFILE
 from engine.tools.profile_matcher import is_profile_aligned
+from engine.tools.location_matcher import is_india_remote_eligible, get_india_remote_score_bonus
 
 logger = logging.getLogger("ScreenerAgent")
 
@@ -10,7 +11,7 @@ class ScreenerAgent(BaseAgent):
     """
     Autonomous Technical Recruiter Agent.
     Evaluates role compatibility against candidate profile using deterministic fast-paths
-    to save 100% of LLM tokens on obvious matches and senior/unrelated mismatches.
+    to save 100% of LLM tokens on obvious matches and senior/unrelated/regional mismatches.
     """
 
     def __init__(self):
@@ -18,16 +19,32 @@ class ScreenerAgent(BaseAgent):
 
     def screen(self, lead: JobLead) -> FitEvaluation:
         """Evaluates job lead fit using deterministic fast-path, falling back to LLM for borderline cases."""
+        # PRE-FILTER 1: Regional ineligibility (excludes India remote applicants)
+        loc_eligible, loc_reason = is_india_remote_eligible(lead.location, lead.description)
+        if not loc_eligible:
+            return FitEvaluation(
+                match_score=20,
+                qualified=False,
+                selected_angle="Disqualified",
+                fit_reasoning=f"Deterministic mismatch: {loc_reason}.",
+                estimated_salary_fit="Uncertain",
+                seniority_fit="Fail"
+            )
+
         aligned, reason = is_profile_aligned(title=lead.role, description=lead.description)
 
-        # FAST PATH 1: Direct, unambiguous profile alignment (Score 85, 0 LLM tokens, 0.001s)
+        # FAST PATH 1: Direct, unambiguous profile alignment (Score 85+, 0 LLM tokens, 0.001s)
         if aligned and any(k in lead.role.lower() for k in ["ai", "applied ai", "llm", "agent", "machine learning", "ml "]):
             angle = "Applied AI & Agentic Systems"
             if "data" in lead.role.lower() or "platform" in lead.role.lower():
                 angle = "Data Platform & Streaming Infrastructure"
 
+            score = 85
+            loc_bonus = get_india_remote_score_bonus(lead.location, lead.description)
+            score = max(0, min(100, score + loc_bonus))
+
             return FitEvaluation(
-                match_score=85,
+                match_score=score,
                 qualified=True,
                 selected_angle=angle,
                 fit_reasoning=f"Deterministic match: {reason}. Profile shows direct technical alignment.",
@@ -68,6 +85,7 @@ Scoring Rules:
 - Score 75-100: Strong match with candidate's target skills.
 - Score 50-74: Borderline match.
 - Score 0-49: Mismatch (e.g. requires 5+ years, or non-technical).
+- Remote & India Preference: High priority (+15 bonus) for roles hiring in India or APAC remote; strong priority (+10 bonus) for Worldwide/Global remote. Reject (score < 40) if restricted to US/EU residency or requires US citizenship.
 
 Return ONLY a JSON object with keys:
 - match_score: integer (0-100)
