@@ -21,6 +21,10 @@ class ContactInfo(BaseModel):
     title: str = "Engineering Decision Maker"
     email: str = ""
     linkedin_url: str = ""
+    twitter_url: Optional[str] = ""
+    role_category: Optional[str] = "Leadership"
+    socials: Optional[dict] = None
+    secondary_contacts: Optional[List[dict]] = None
     enrichment_source: str = "Automated Discovery"
 
 class FitEvaluation(BaseModel):

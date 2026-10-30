@@ -76,6 +76,17 @@ def push_to_notion(pkg: ApplicationPackage) -> Tuple[bool, str]:
 
     status_name = "Email Sent Live" if "Sent" in pkg.dispatch_status else ("Draft Created in Gmail" if "Draft" in pkg.dispatch_status else "To Review")
 
+    target_contact_str = f"{pkg.contact.name} ({pkg.contact.title})"
+    if getattr(pkg.contact, "twitter_url", None):
+        target_contact_str += f" | X: {pkg.contact.twitter_url}"
+    sec_contacts = getattr(pkg.contact, "secondary_contacts", None)
+    if sec_contacts:
+        for s in sec_contacts[:2]:
+            s_name = s.get("name")
+            s_cat = s.get("role_key", "Team")
+            if s_name and s_name != pkg.contact.name:
+                target_contact_str += f" · {s_cat}: {s_name}"
+
     properties = {
         "Company": {
             "title": [{"text": {"content": pkg.company_clean_name[:100]}}]
@@ -93,7 +104,7 @@ def push_to_notion(pkg: ApplicationPackage) -> Tuple[bool, str]:
             "rich_text": [{"text": {"content": f"{pkg.fit.fit_reasoning}\n\nBullets:\n" + "\n".join(pkg.tailored_resume_bullets)[:1800]}}]
         },
         "Target Contact": {
-            "rich_text": [{"text": {"content": f"{pkg.contact.name} ({pkg.contact.title})"[:2000]}}]
+            "rich_text": [{"text": {"content": target_contact_str[:2000]}}]
         },
         "Dispatch Status": {
             "select": {"name": status_name}

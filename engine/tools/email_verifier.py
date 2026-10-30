@@ -16,6 +16,22 @@ DISPOSABLE_DOMAINS = {
     "yopmail.com", "trashmail.com", "fakemailgenerator.com"
 }
 
+UNHELPFUL_EMAIL_PREFIXES = (
+    "support@", "help@", "info@", "billing@", "sales@", "press@", "media@",
+    "admin@", "office@", "service@", "customerservice@", "legal@", "privacy@",
+    "abuse@", "security@", "terms@", "inquiry@", "inquiries@", "contact@"
+)
+
+def is_unhelpful_generic_email(email: str) -> bool:
+    """
+    Returns True if email is a customer support, billing, inquiry, or unmonitored general mailbox
+    that should NOT be used for direct cold job outreach.
+    """
+    if not email or not isinstance(email, str):
+        return True
+    clean = email.strip().lower()
+    return any(clean.startswith(prefix) for prefix in UNHELPFUL_EMAIL_PREFIXES)
+
 _DNS_CACHE = {}
 
 def does_domain_exist(domain: str) -> bool:
@@ -61,10 +77,11 @@ def does_domain_exist(domain: str) -> bool:
     _DNS_CACHE[domain] = False
     return False
 
-def verify_and_clean_email(raw_email: Optional[str]) -> Tuple[bool, str, str]:
+def verify_and_clean_email(raw_email: Optional[str], allow_generic: bool = True) -> Tuple[bool, str, str]:
     """
     Validates email format, verifies domain exists on public DNS,
     and strips illegal characters or synthetic domains.
+    If allow_generic is False, rejects customer support/info mailboxes unsuitable for outreach.
     Returns (is_valid, clean_email, reason).
     """
     if not raw_email or not isinstance(raw_email, str):
@@ -85,6 +102,10 @@ def verify_and_clean_email(raw_email: Optional[str]) -> Tuple[bool, str, str]:
     # Block disposable domains
     if domain in DISPOSABLE_DOMAINS:
         return False, "", "Disposable email domain rejected"
+
+    # Reject support/info generic mailboxes if allow_generic is False
+    if not allow_generic and is_unhelpful_generic_email(clean):
+        return False, "", "Generic support/info mailbox unsuitable for outreach"
 
     # Block common invalid or test domains
     if domain.endswith((".test", ".example", ".invalid", ".localhost")):

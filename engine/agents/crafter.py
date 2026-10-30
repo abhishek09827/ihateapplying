@@ -39,36 +39,44 @@ Core Highlights:
 {oss_section}
 """
 
-        prompt = f"""You are the elite technical career agent for {CANDIDATE_NAME}.
-CANDIDATE SUMMARY:
+        prompt = f"""You are an engineer writing directly to a technical peer (founder, CTO, or engineering lead).
+
+ENGINEER PROFILE:
 {concise_profile}
 
-TARGET OPPORTUNITY:
+TARGET OPPORTUNITY & TEAM:
 Company: {lead.company}
 Role: {lead.role}
 Channel: {lead.source_channel}
-Funding Info: {lead.funding_info or 'VC-backed'}
-Job Description / Overview: {lead.description[:1200]}
+Job Overview / Tech Context: {lead.description[:1200]}
 
-STRATEGIC DECISION:
-Selected Angle: {fit.selected_angle}
+PITCH STRATEGY:
+Selected Technical Angle: {fit.selected_angle}
 Fit Reasoning: {fit.fit_reasoning}
 Recipient: {contact.name} ({contact.title})
 
-INSTRUCTIONS FOR COLD EMAIL:
-1. Address the recipient naturally (e.g. "Hi {recipient_first_name}," or "Hi {lead.company} team,").
-2. Keep length STRICTLY between 75 and 95 words.
-3. Open with a 1-sentence hook demonstrating clear understanding of what {lead.company} is building or their recent milestone.
-4. Pitch {CANDIDATE_NAME} for the {lead.role} role. CITE:
-   - Specific production metrics and technical impact from candidate summary.
-   - Genuine alignment with {lead.company}'s mission and technical stack.
-5. End with a low-friction CTA: "Would you be open to a 15-minute chat this week? I've attached my tailored resume for reference."
-6. NO generic filler sentences ("I hope you are well", "I am thrilled to apply", etc.).
-7. Do not include candidate signature links at the end (these are appended automatically by the system).
+CRITICAL GUIDELINES FOR THE EMAIL (ENGINEER-TO-ENGINEER):
+1. TONE: Peer-to-peer, pragmatic, technical, and respectful of another engineer's time.
+   Sound like two builders talking shop about systems they design, NOT a candidate presenting a list of qualifications.
+2. SUBJECT LINE: Short, natural, lowercase or concise sentence case.
+   Examples: "{lead.company.lower()}'s architecture & pipelines", "pipelines & infrastructure at {lead.company}", "quick note on {lead.role.lower()} / systems".
+   NEVER use formal titles like "Application for..." or "Job Inquiry...".
+3. SALUTATION: "Hi {recipient_first_name}," (or "Hi {lead.company} eng team,").
+4. OPENING: 1 sentence noticing a specific technical problem or capability {lead.company} is building or scaling.
+5. TECHNICAL BRIDGE: Connect on a real engineering challenge or system from candidate summary. Speak to the engineering tradeoff or architecture rather than reciting credentials.
+6. STRICT PROHIBITIONS:
+   - DO NOT state years of experience ("I have X years of experience...").
+   - DO NOT list resume credentials or bulleted qualifications ("My skills include:").
+   - DO NOT use applicant clichés: "I am writing to apply", "I am thrilled to express my interest", "I believe I am an ideal fit", "Please find my resume attached".
+   - DO NOT use recruiter CTAs: "Would you be open to a 15-minute chat this week?".
+7. CALL TO ACTION: Casual, low-friction, engineer-to-engineer curiosity:
+   e.g. "Curious how your team is approaching [system challenge] as you scale. Happy to share what worked (and what broke) or grab 10 mins to talk shop if useful."
+8. LENGTH: Keep between 65 and 85 words.
+9. Do not include signature links in the body (the system appends them automatically).
 
 INSTRUCTIONS FOR LINKEDIN NOTE:
-- Under 280 characters.
-- Crisp, respectful connection request highlighting relevant fit.
+- Under 250 characters.
+- Direct, friendly engineer-to-engineer connection request highlighting mutual technical interest.
 
 INSTRUCTIONS FOR RESUME BULLETS:
 - Provide exactly 2 impactful bullet points (each 1-2 lines) tailored to {lead.company} and {fit.selected_angle}.
@@ -77,12 +85,12 @@ INSTRUCTIONS FOR RESUME BULLETS:
 Return ONLY a valid JSON object with keys:
 - company_clean_name: string (clean brand name without Inc./LLC/GmbH)
 - cold_email_subject: string (short, engaging, professional subject line)
-- cold_email_body: string (75-95 word email body)
-- linkedin_note: string (<280 char LinkedIn note)
+- cold_email_body: string (65-85 word email body)
+- linkedin_note: string (<250 char LinkedIn note)
 - tailored_resume_bullets: array of 2 strings
 """
 
-        data = self.generate_json(prompt, system_prompt="You are an elite executive copywriter and technical recruiter.", temperature=0.25)
+        data = self.generate_json(prompt, system_prompt="You are a senior systems engineer reaching out to a fellow engineer. You write concise, high-signal, peer-to-peer notes.", temperature=0.25)
 
         clean_company = data.get("company_clean_name", lead.company).strip()
         bullets = data.get("tailored_resume_bullets", [
