@@ -28,7 +28,7 @@ from engine.state import JobLead, ContactInfo, FitEvaluation, ApplicationPackage
 from engine.tools.notion_client import fetch_pending_notion_applications, update_notion_page
 from engine.tools.email_client import create_gmail_draft, send_gmail_smtp
 from engine.tools.resume_compiler import compile_tailored_resume
-from engine.tools.email_verifier import verify_and_clean_email
+from engine.tools.email_verifier import verify_and_clean_email, is_unhelpful_generic_email
 from engine.agents.lead_enricher import EnrichmentAgent
 
 console = Console()
@@ -96,9 +96,13 @@ def main():
                     })
                     console.print(f"  [green]✓ Discovered & updated email for {company}: {clean_mail}[/green]")
 
-        # 2. Check if email is ready
+        # 2. Check if email is ready & avoid support/info mailboxes
         if not email:
             table.add_row(company, role[:20], "[dim]Missing Email[/dim]", "[yellow]Skipped (No Email)[/yellow]")
+            continue
+
+        if is_unhelpful_generic_email(email):
+            table.add_row(company, role[:20], email, "[yellow]Skipped (Support/Info Email)[/yellow]")
             continue
 
         # 3. Parse Subject and Body from email_text

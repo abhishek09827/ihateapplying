@@ -88,7 +88,7 @@ def format_email_body_with_links(body: str) -> str:
     links_text = "\n".join(links_block)
 
     signature = (
-        f"\n\nBest regards,\n"
+        f"\n\nBest,\n"
         f"{CANDIDATE_NAME}\n"
         f"{CANDIDATE_TITLE}\n"
         f"{CANDIDATE_PHONE + ' | ' if CANDIDATE_PHONE else ''}{CANDIDATE_EMAIL}\n\n"
@@ -116,8 +116,8 @@ def dispatch_cold_email(
     if not active_user or not active_password:
         return False, "Gmail credentials not configured in .env"
 
-    # 1. DNS Deliverability & Format Verification (Prevents emailing non-existent domains)
-    is_valid, clean_email, reason = verify_and_clean_email(to_email)
+    # 1. DNS Deliverability & Format Verification (Prevents emailing non-existent domains or support mailboxes)
+    is_valid, clean_email, reason = verify_and_clean_email(to_email, allow_generic=False)
     if not is_valid or not clean_email:
         logger.warning(f"Email dispatch aborted for '{to_email}': {reason}")
         return False, f"Email Blocked: {reason}"
