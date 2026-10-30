@@ -25,64 +25,81 @@ class ApplicationCrafterAgent(BaseAgent):
         highlights = MASTER_PROFILE.get("experience_highlights", [])
         open_source = MASTER_PROFILE.get("open_source", [])
 
-        recipient_first_name = contact.name.split()[0] if contact.name and contact.name not in ("Founder / CTO", "Hiring Lead") else "there"
+        recipient_first_name = contact.name.split()[0] if contact.name and contact.name not in ("Founder / CTO", "Hiring Lead", "Founder / Engineering Lead", "Engineering Decision Maker") else "there"
 
-        highlights_str = "\n".join([f"- {h}" for h in highlights[:3]])
-        oss_str = "\n".join([f"- {o}" for o in open_source[:2]]) if open_source else ""
+        highlights_str = "\n".join([f"- {h}" for h in highlights[:4]])
+        oss_str = "\n".join([f"- {o}" for o in open_source[:3]]) if open_source else ""
         oss_section = f"Open Source / Key Projects:\n{oss_str}" if oss_str else ""
 
         concise_profile = f"""
 Candidate: {CANDIDATE_NAME} ({CANDIDATE_TITLE})
-Experience: {candidate.get('years_experience', '1-3 Years production experience')}
-Core Highlights:
+Core Technical Systems & Proof:
 {highlights_str}
 {oss_section}
 """
 
-        prompt = f"""You are the elite technical career agent for {CANDIDATE_NAME}.
-CANDIDATE SUMMARY:
+        prompt = f"""You are an engineer writing directly to a technical peer or founder (founder, CTO, or engineering lead).
+You follow the proven cold outreach principles from 'The Guide to Getting a Job with Cold Email':
+1. You can email any company you want to work for, even without a formal job post. Startups always make exceptions for competent engineers who show proof of work.
+2. Under 100 words (optimal: 70-90 words). Less is more. Busy founders and engineers discard walls of text.
+3. Zero buzzwords (no "executed key initiatives", "drove impact", "thrilled to apply", "unique qualifications"). Use plain, honest, human language. Must pass the 'read out loud' test.
+4. Specificity over abstraction: Cite concrete systems built and numbers from the candidate summary.
+5. Always end with a clear, specific, low-friction ask ("Worth a chat?").
+
+ENGINEER PROFILE:
 {concise_profile}
 
-TARGET OPPORTUNITY:
+TARGET OPPORTUNITY & TEAM:
 Company: {lead.company}
 Role: {lead.role}
-Channel: {lead.source_channel}
-Funding Info: {lead.funding_info or 'VC-backed'}
-Job Description / Overview: {lead.description[:1200]}
+Domain: {lead.domain}
+Source Channel: {lead.source_channel}
+Funding / Signal: {lead.funding_info or 'High-Growth Tech Startup'}
+Job Overview / Tech Context: {lead.description[:1200]}
 
-STRATEGIC DECISION:
-Selected Angle: {fit.selected_angle}
+PITCH STRATEGY:
+Selected Technical Angle: {fit.selected_angle}
 Fit Reasoning: {fit.fit_reasoning}
 Recipient: {contact.name} ({contact.title})
 
-INSTRUCTIONS FOR COLD EMAIL:
-1. Address the recipient naturally (e.g. "Hi {recipient_first_name}," or "Hi {lead.company} team,").
-2. Keep length STRICTLY between 75 and 95 words.
-3. Open with a 1-sentence hook demonstrating clear understanding of what {lead.company} is building or their recent milestone.
-4. Pitch {CANDIDATE_NAME} for the {lead.role} role. CITE:
-   - Specific production metrics and technical impact from candidate summary.
-   - Genuine alignment with {lead.company}'s mission and technical stack.
-5. End with a low-friction CTA: "Would you be open to a 15-minute chat this week? I've attached my tailored resume for reference."
-6. NO generic filler sentences ("I hope you are well", "I am thrilled to apply", etc.).
-7. Do not include candidate signature links at the end (these are appended automatically by the system).
+CRITICAL STRUCTURE REQUIREMENTS FOR THE EMAIL (3-PART FORMAT):
+1. SUBJECT LINE: Short, natural, lowercase or concise sentence case.
+   Examples: "{lead.company.lower()}'s agent workflows & pipelines", "agent evals & streaming at {lead.company}", "helping scale {lead.company.lower()}", "quick note on {lead.company.lower()}'s infra".
+   NEVER use formal titles like "Application for..." or "Job Inquiry...".
+2. SALUTATION: "Hi {recipient_first_name}," (or "Hi {lead.company} team,").
+3. PART 1 — WHO YOU ARE & WHY REACHING OUT (1-2 sentences):
+   Introduce {CANDIDATE_NAME} plainly as an engineer and mention specifically how you came across their work (e.g., saw what they're building at {lead.company} via {lead.source_channel} / GitHub / their recent funding round) and wanted to reach out directly to help build/scale the product.
+4. PART 2 — WHY THEY SHOULD CARE (Exactly 2 concise bullet points with concrete metrics):
+   Include "Two things from my background that may be relevant:" followed by exactly 2 bullet points:
+   • Bullet 1: Concrete system built with numbers from the candidate highlights.
+   • Bullet 2: Concrete open source tool or production architecture built from candidate summary.
+   Ensure the two bullets directly align with {lead.company}'s engineering domain and {fit.selected_angle}.
+5. PART 3 — CLEAR, LOW-FRICTION ASK (1 sentence):
+   "I think I could help your team build out and scale [specific subsystem/feature] quickly and would like to learn more. Worth a chat?" (or "Open to 10 mins this week to talk shop?").
+6. STRICT PROHIBITIONS:
+   - DO NOT state arbitrary tenure or years of experience ("I have X years of experience...").
+   - DO NOT write walls of text. Keep between 70 and 95 words total before signature.
+   - DO NOT use applicant clichés: "I am writing to apply", "I believe I am an ideal fit", "Please find my resume attached".
+   - DO NOT include fake flattery ("been a huge fan for years", "I loved your LinkedIn post").
+   - Do not include signature links in the body (the system appends them automatically).
 
 INSTRUCTIONS FOR LINKEDIN NOTE:
-- Under 280 characters.
-- Crisp, respectful connection request highlighting relevant fit.
+- Under 250 characters.
+- Direct, friendly engineer-to-engineer connection request citing mutual technical interest.
 
 INSTRUCTIONS FOR RESUME BULLETS:
-- Provide exactly 2 impactful bullet points (each 1-2 lines) tailored to {lead.company} and {fit.selected_angle}.
-- Quantify impact, cite modern technologies matching the job requirements.
+- Exactly 2 high-impact technical bullets tailored to {lead.company} and {fit.selected_angle}.
+- Emphasize architecture, concrete metrics, and relevant stack.
 
 Return ONLY a valid JSON object with keys:
-- company_clean_name: string (clean brand name without Inc./LLC/GmbH)
-- cold_email_subject: string (short, engaging, professional subject line)
-- cold_email_body: string (75-95 word email body)
-- linkedin_note: string (<280 char LinkedIn note)
+- company_clean_name: string
+- cold_email_subject: string
+- cold_email_body: string
+- linkedin_note: string
 - tailored_resume_bullets: array of 2 strings
 """
 
-        data = self.generate_json(prompt, system_prompt="You are an elite executive copywriter and technical recruiter.", temperature=0.25)
+        data = self.generate_json(prompt, system_prompt="You are a systems and AI engineer reaching out to a fellow engineer. You write concise, high-signal, peer-to-peer notes.", temperature=0.25)
 
         clean_company = data.get("company_clean_name", lead.company).strip()
         bullets = data.get("tailored_resume_bullets", [
