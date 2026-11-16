@@ -76,6 +76,11 @@ def push_to_notion(pkg: ApplicationPackage) -> Tuple[bool, str]:
 
     status_name = "Email Sent Live" if "Sent" in pkg.dispatch_status else ("Draft Created in Gmail" if "Draft" in pkg.dispatch_status else "To Review")
 
+    tc_text = f"{pkg.contact.name} ({pkg.contact.title})"
+    perms = getattr(pkg.contact, "email_permutations", None)
+    if perms and len(perms) > 1:
+        tc_text += f" | Permutations: {', '.join(perms[:3])}"
+
     properties = {
         "Company": {
             "title": [{"text": {"content": pkg.company_clean_name[:100]}}]
@@ -93,7 +98,7 @@ def push_to_notion(pkg: ApplicationPackage) -> Tuple[bool, str]:
             "rich_text": [{"text": {"content": f"{pkg.fit.fit_reasoning}\n\nBullets:\n" + "\n".join(pkg.tailored_resume_bullets)[:1800]}}]
         },
         "Target Contact": {
-            "rich_text": [{"text": {"content": f"{pkg.contact.name} ({pkg.contact.title})"[:2000]}}]
+            "rich_text": [{"text": {"content": tc_text[:2000]}}]
         },
         "Dispatch Status": {
             "select": {"name": status_name}
