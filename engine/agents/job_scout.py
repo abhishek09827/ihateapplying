@@ -21,53 +21,72 @@ class JobScoutAgent(BaseAgent):
         super().__init__(name="JobScoutAgent", role="Targeted Remote Job Sourcing Specialist")
 
     def run(self, limit: int = 40, seen_companies: Optional[Any] = None, page_offset: int = 0) -> List[JobLead]:
-        leads: List[JobLead] = []
+        """
+        Runs comprehensive multi-source remote job collection across all configured job boards:
+        RemoteOK, Remotive, Jobicy, HN Who is Hiring, and Arbeitnow.
+        Shortlists candidates fairly using round-robin interleaving.
+        """
         seen = set(seen_companies or set())
         collected_companies = set()
+        per_source = max(10, limit // 3)
 
-        def add_leads(new_leads: List[JobLead]):
-            for l in new_leads:
-                ck = l.company.strip().lower()
-                if ck not in seen and ck not in collected_companies:
-                    leads.append(l)
-                    collected_companies.add(ck)
-
-        per_source = max(15, limit // 3)
+        source_buckets: Dict[str, List[JobLead]] = {
+            "remoteok": [],
+            "remotive": [],
+            "jobicy": [],
+            "hn_hiring": [],
+            "arbeitnow": []
+        }
 
         # Source 1: RemoteOK (AI, Python, Backend, Data, Cloud)
         try:
-            add_leads(self._fetch_remoteok(limit=per_source, seen=seen))
+            source_buckets["remoteok"] = self._fetch_remoteok(limit=per_source, seen=seen)
         except Exception as e:
             logger.error(f"RemoteOK fetch failed: {e}")
 
         # Source 2: Remotive (AI, LLM, Agent, Machine Learning, Python, Backend)
         try:
-            add_leads(self._fetch_remotive(limit=per_source, seen=seen))
+            source_buckets["remotive"] = self._fetch_remotive(limit=per_source, seen=seen)
         except Exception as e:
             logger.error(f"Remotive fetch failed: {e}")
 
         # Source 3: Jobicy (Python, Data-Science, Engineering, Backend)
         try:
-            add_leads(self._fetch_jobicy(limit=per_source, seen=seen))
+            source_buckets["jobicy"] = self._fetch_jobicy(limit=per_source, seen=seen)
         except Exception as e:
             logger.error(f"Jobicy fetch failed: {e}")
 
         # Source 4: HN Who is Hiring (Monthly YC/HN Remote hiring thread)
         try:
-            add_leads(self._fetch_hn_who_is_hiring(limit=per_source, seen=seen))
+            source_buckets["hn_hiring"] = self._fetch_hn_who_is_hiring(limit=per_source, seen=seen)
         except Exception as e:
             logger.error(f"HN Who is Hiring fetch failed: {e}")
 
-        # Source 5: Arbeitnow (Multi-page global remote jobs)
-        if len(leads) < limit:
-            try:
-                add_leads(self._fetch_arbeitnow(limit=limit - len(leads), seen=seen, page_offset=page_offset))
-            except Exception as e:
-                logger.error(f"Arbeitnow fetch failed: {e}")
+        # Source 5: Arbeitnow (Always explored across all rounds)
+        try:
+            source_buckets["arbeitnow"] = self._fetch_arbeitnow(limit=per_source, seen=seen, page_offset=page_offset)
+        except Exception as e:
+            logger.error(f"Arbeitnow fetch failed: {e}")
+
+        # Fair multi-source shortlisting: round-robin interleave across all explored job sources
+        shortlisted: List[JobLead] = []
+        max_bucket = max(len(b) for b in source_buckets.values()) if source_buckets else 0
+        for i in range(max_bucket):
+            for src_name, src_leads in source_buckets.items():
+                if i < len(src_leads):
+                    lead = src_leads[i]
+                    ck = lead.company.strip().lower()
+                    if ck not in seen and ck not in collected_companies:
+                        shortlisted.append(lead)
+                        collected_companies.add(ck)
+                        if len(shortlisted) >= limit:
+                            break
+            if len(shortlisted) >= limit:
+                break
 
         # Sort all aggregated candidate leads by timestamp descending (LATEST FIRST)
-        leads.sort(key=lambda x: x.timestamp, reverse=True)
-        return leads[:limit]
+        shortlisted.sort(key=lambda x: x.timestamp, reverse=True)
+        return shortlisted[:limit]
 
     def _fetch_remoteok(self, limit: int = 25, seen: Optional[Any] = None) -> List[JobLead]:
         headers = {"User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36"}

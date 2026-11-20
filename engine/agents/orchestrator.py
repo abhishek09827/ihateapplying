@@ -21,6 +21,7 @@ from engine.config import (
 )
 from engine.tools.notion_client import get_existing_notion_companies
 from engine.tools.alerter import send_error_alert
+from engine.tools.entity_validator import classify_entity_commercial_vs_hobby
 from engine.agents.job_scout import JobScoutAgent
 from engine.agents.startup_scout import FundedStartupAgent
 from engine.agents.screener import ScreenerAgent
@@ -163,12 +164,30 @@ class OutreachOrchestrator:
         except Exception as e:
             logger.error(f"Error during discovery phase: {e}")
 
-        # Step 3: Chronological Sorting (NEWEST / LATEST POSTED FIRST)
-        candidate_pool.sort(key=lambda x: x.timestamp, reverse=True)
+        # Step 3: Priority Sorting & Multi-Source Fair Representation
+        channel_buckets: dict = {}
+        for lead in candidate_pool:
+            ch = lead.source_channel
+            if ch not in channel_buckets:
+                channel_buckets[ch] = []
+            channel_buckets[ch].append(lead)
+
+        for ch in channel_buckets:
+            channel_buckets[ch].sort(key=lambda x: x.timestamp, reverse=True)
+
+        interleaved_pool: List[JobLead] = []
+        max_ch_len = max(len(b) for b in channel_buckets.values()) if channel_buckets else 0
+        for i in range(max_ch_len):
+            for ch_name, ch_leads in channel_buckets.items():
+                if i < len(ch_leads):
+                    interleaved_pool.append(ch_leads[i])
+
+        candidate_pool = interleaved_pool
+
         console.print(Panel(
             f"[bold green]Funnel Sourcing Complete![/bold green]\n"
-            f"Collected [bold]{len(candidate_pool)}[/bold] fresh candidates matching profile.\n"
-            f"Prioritized chronologically: [bold cyan]Latest postings evaluated first[/bold cyan].",
+            f"Collected [bold]{len(candidate_pool)}[/bold] fresh candidates across [bold]{len(channel_buckets)}[/bold] distinct channels.\n"
+            f"Fair representation: Shortlisted via round-robin interleaving (Latest postings first within channel).",
             title="Candidate Funnel Status",
             border_style="green"
         ))
@@ -204,6 +223,24 @@ class OutreachOrchestrator:
                 if not fit.qualified:
                     report.screened_out_count += 1
                     continue
+
+                # Entity Classification: Classify Commercial Startup vs Hobby / Student Experiment / Noise
+                is_commercial, class_reason, class_meta = classify_entity_commercial_vs_hobby(
+                    company=lead.company,
+                    domain=lead.domain,
+                    lead_url=lead.url,
+                    description=lead.description,
+                    source_channel=lead.source_channel
+                )
+                if not is_commercial:
+                    console.print(f"  [EntityClassifier] [yellow]⏩ Screened out {lead.company}: Hobby / Student Experiment ({class_reason}). Bypassing Notion & outreach.[/yellow]")
+                    report.screened_out_count += 1
+                    report.hobby_screened_out_count += 1
+                    continue
+
+                if class_meta.get("company_linkedin_url"):
+                    lead.company_linkedin_url = class_meta["company_linkedin_url"]
+                lead.entity_type = class_meta.get("entity_type", "Commercial Startup")
 
                 report.qualified_count += 1
 
@@ -266,7 +303,7 @@ class OutreachOrchestrator:
 
         console.print(table)
         console.print(f"\nTotal Fresh Leads Sourced: [bold]{len(candidate_pool)}[/bold]")
-        console.print(f"Applications Qualified: [bold green]{report.qualified_count}[/bold green] | Screened Out: [bold yellow]{report.screened_out_count}[/bold yellow]")
+        console.print(f"Applications Qualified: [bold green]{report.qualified_count}[/bold green] | Screened Out: [bold yellow]{report.screened_out_count}[/bold yellow] (Hobby/Student Filtered: [bold]{report.hobby_screened_out_count}[/bold])")
         console.print(f"Applications Dispatched: [bold green]{report.dispatched_count}[/bold green] | Notion Synced: [bold green]{report.notion_synced_count}[/bold green]")
 
         return report
