@@ -100,6 +100,7 @@ class EnrichmentAgent(BaseAgent):
             title=founder_title,
             email=final_email,
             linkedin_url=final_linkedin,
+            company_linkedin_url=lead.company_linkedin_url,
             enrichment_source="Hybrid Intelligence (DNS Verified)" if final_email else "LinkedIn Only (No Verified Email)"
         )
 

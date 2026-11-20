@@ -106,8 +106,9 @@ def push_to_notion(pkg: ApplicationPackage) -> Tuple[bool, str]:
     if pkg.contact.email:
         properties["Contact Email"] = {"email": pkg.contact.email}
 
-    if pkg.contact.linkedin_url:
-        properties["LinkedIn URL"] = {"url": pkg.contact.linkedin_url[:2000]}
+    li_url = pkg.contact.linkedin_url or getattr(pkg.contact, "company_linkedin_url", None) or getattr(pkg.lead, "company_linkedin_url", None)
+    if li_url:
+        properties["LinkedIn URL"] = {"url": li_url[:2000]}
 
     if pkg.lead.url:
         properties["Job Posting URL"] = {"url": pkg.lead.url[:2000]}

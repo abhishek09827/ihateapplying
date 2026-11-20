@@ -15,12 +15,16 @@ class JobLead(BaseModel):
     direct_email_hint: Optional[str] = None
     published_at: Optional[str] = None
     timestamp: float = 0.0
+    company_linkedin_url: Optional[str] = None
+    entity_type: Optional[str] = "Commercial Startup"
+    stars: Optional[int] = None
 
 class ContactInfo(BaseModel):
     name: str = "Founder / Hiring Lead"
     title: str = "Engineering Decision Maker"
     email: str = ""
     linkedin_url: str = ""
+    company_linkedin_url: Optional[str] = None
     enrichment_source: str = "Automated Discovery"
 
 class FitEvaluation(BaseModel):
@@ -50,6 +54,7 @@ class PipelineReport(BaseModel):
     remote_jobs_count: int = 0
     funded_startups_count: int = 0
     screened_out_count: int = 0
+    hobby_screened_out_count: int = 0
     qualified_count: int = 0
     dispatched_count: int = 0
     notion_synced_count: int = 0

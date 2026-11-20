@@ -10,6 +10,12 @@ from engine.agents.base import BaseAgent
 from engine.state import JobLead
 from engine.config import TARGET_STARTUPS_PATH
 from engine.tools.date_utils import parse_date_to_timestamp
+from engine.tools.entity_validator import (
+    extract_github_owner_repo,
+    validate_github_repo_metadata,
+    GENERIC_INVALID_COMPANY_NAMES,
+    is_blocked_github_slug
+)
 
 logger = logging.getLogger("FundedStartupAgent")
 
@@ -23,40 +29,52 @@ class FundedStartupAgent(BaseAgent):
         super().__init__(name="FundedStartupAgent", role="AI Venture Capital & Startup Scout")
 
     def run(self, limit: int = 30, seen_companies: Optional[Any] = None, page_offset: int = 0) -> List[JobLead]:
-        leads: List[JobLead] = []
         seen = set(seen_companies or set())
         collected = set()
-
-        def add_leads(new_leads: List[JobLead]):
-            for l in new_leads:
-                ck = l.company.strip().lower()
-                if ck not in seen and ck not in collected:
-                    leads.append(l)
-                    collected.add(ck)
-
         per_source_limit = max(10, limit // 2)
+
+        source_buckets: Dict[str, List[JobLead]] = {
+            "techcrunch": [],
+            "hn_funding": [],
+            "curated": []
+        }
 
         # 1. TechCrunch AI, Enterprise & Startups RSS
         try:
-            add_leads(self._fetch_techcrunch_ai_funding(limit=per_source_limit, seen=seen))
+            source_buckets["techcrunch"] = self._fetch_techcrunch_ai_funding(limit=per_source_limit, seen=seen)
         except Exception as e:
             logger.error(f"TechCrunch AI funding fetch failed: {e}")
 
         # 2. Hacker News Targeted AI Funding Stories & Launch HN
         try:
-            add_leads(self._fetch_hn_ai_funding_and_launches(limit=per_source_limit, seen=seen))
+            source_buckets["hn_funding"] = self._fetch_hn_ai_funding_and_launches(limit=per_source_limit, seen=seen)
         except Exception as e:
             logger.error(f"HN AI funding & launches fetch failed: {e}")
 
         # 3. Curated Target Startups
-        if len(leads) < limit:
-            try:
-                add_leads(self._fetch_curated_startups(limit=limit - len(leads), seen=seen))
-            except Exception as e:
-                logger.error(f"Curated startups fetch failed: {e}")
+        try:
+            source_buckets["curated"] = self._fetch_curated_startups(limit=per_source_limit, seen=seen)
+        except Exception as e:
+            logger.error(f"Curated startups fetch failed: {e}")
 
-        leads.sort(key=lambda x: x.timestamp, reverse=True)
-        return leads[:limit]
+        # Fair multi-source shortlisting: round-robin interleave
+        combined: List[JobLead] = []
+        max_bucket = max(len(b) for b in source_buckets.values()) if source_buckets else 0
+        for i in range(max_bucket):
+            for src_name, src_leads in source_buckets.items():
+                if i < len(src_leads):
+                    lead = src_leads[i]
+                    ck = lead.company.strip().lower()
+                    if ck not in seen and ck not in collected and ck not in GENERIC_INVALID_COMPANY_NAMES:
+                        combined.append(lead)
+                        collected.add(ck)
+                        if len(combined) >= limit:
+                            break
+            if len(combined) >= limit:
+                break
+
+        combined.sort(key=lambda x: x.timestamp, reverse=True)
+        return combined[:limit]
 
     def _fetch_curated_startups(self, limit: int = 15, seen: Optional[Any] = None) -> List[JobLead]:
         if not TARGET_STARTUPS_PATH.exists():

@@ -61,6 +61,22 @@ def does_domain_exist(domain: str) -> bool:
     _DNS_CACHE[domain] = False
     return False
 
+def does_domain_have_mx(domain: str) -> bool:
+    """Verifies that domain specifically has MX records configured for receiving mail."""
+    domain = domain.lower().strip()
+    if not domain or "." not in domain:
+        return False
+    if HAS_DNSPYTHON:
+        try:
+            resolver = dns.resolver.Resolver()
+            resolver.timeout = 3.0
+            resolver.lifetime = 3.0
+            answers = resolver.resolve(domain, 'MX')
+            return bool(answers)
+        except Exception:
+            return False
+    return does_domain_exist(domain)
+
 def verify_and_clean_email(raw_email: Optional[str]) -> Tuple[bool, str, str]:
     """
     Validates email format, verifies domain exists on public DNS,
