@@ -1,49 +1,38 @@
-# 📨 Cold Outreach Email Template & Copywriting Guidelines
-# The ApplicationCrafterAgent uses this structured framework to generate
-# concise (75–95 words), high-converting emails tailored to each company.
+# Cold Outreach Email Format & Copywriting Guidelines
+# The ApplicationCrafterAgent uses natural, peer-to-peer prose tailored
+# specifically to each target company so emails read like a human Gmail note
+# and avoid spam/AI detection triggers.
 
 ---
 
 ### Format Architecture
 
 ```text
-Subject: {{ROLE}} @ {{COMPANY}} — {{CANDIDATE_NAME}}
+Subject: {{SHORT_LOWERCASE_SUBJECT}} (e.g. "kafka ingestion at {{COMPANY}}")
 
 Hi {{RECIPIENT_FIRST_NAME}},
 
-{{HOOK_LINE}} (1 sentence acknowledging what {{COMPANY}} is building or their recent milestone).
+{{CONTEXT_OPENING}} (1-2 natural sentences referencing what {{COMPANY}} is building or solving).
 
-{{VALUE_PITCH}} (2 sentences highlighting relevant production experience, quantified metrics, and direct alignment with {{ROLE}} and {{COMPANY}}'s tech stack).
+{{RELEVANT_PROOF}} (1-2 conversational sentences weaving in the most relevant systems/PRs built from your profile matching {{COMPANY}}'s domain).
 
-{{CALL_TO_ACTION}} (Low-friction 1-sentence ask: "Are you open to a brief 10-minute chat this week? If preferred, I can also submit directly via your careers portal.").
+{{HUMAN_ASK}} (Brief, low-pressure question specific to their team).
 
-Best regards,
+Best,
 {{CANDIDATE_NAME}}
-{{CANDIDATE_TITLE}}
 {{CANDIDATE_PHONE}} | {{CANDIDATE_EMAIL}}
-
-Verified Links:
-• Master Resume (Google Drive): {{RESUME_DRIVE_URL}}
-• Portfolio: {{PORTFOLIO_URL}}
-• GitHub: {{GITHUB_URL}}
-• LinkedIn: {{LINKEDIN_URL}}
-
-📎 Tailored 1-page PDF resume also attached.
+Resume: {{RESUME_DRIVE_URL}}
+GitHub: {{GITHUB_URL}}
+Portfolio: {{PORTFOLIO_URL}}
+LinkedIn: {{LINKEDIN_URL}}
 ```
 
 ---
 
-### Copywriting Rules Enforced by Crafter Agent
+### Anti-AI & Anti-Spam Rules Enforced by Crafter Agent
 
-1. **Strict Word Count**: Body must stay between **75 and 95 words**. Executives and founders ignore essays.
-2. **Zero Generic Fluff**: Forbidden phrases:
-   - ❌ *"I hope this email finds you well"*
-   - ❌ *"I am writing to express my enthusiasm / excited to apply"*
-   - ❌ *"As a passionate and hardworking developer"*
-3. **Quantified Impact**: Every pitch cites hard numbers (e.g. `40K records/sec`, `45% latency reduction`, `sub-5ms query response`).
-4. **All 4 Candidate Links Appended**:
-   - Master Resume (Google Drive public view link)
-   - Portfolio Website
-   - GitHub Profile
-   - LinkedIn Profile
-5. **Always Attach Tailored PDF**: A tailored, compiled Typst 1-page PDF resume is guaranteed to be attached to every email.
+1. **Concise Prose (60–90 words)**: Short 2–3 paragraph conversational note. Avoid rigid bulleted lists inside the email body.
+2. **Zero Em-Dashes, Emojis, or Attached-Resume Boilerplate**: No `—`, no `📎`, no `"Tailored 1-page PDF resume is also attached"`, and no `"Links:"` / `"Verified Links:"` headers.
+3. **Plain Human Language**: Uses natural contractions, avoids corporate buzzwords (*leverage*, *delve*, *streamline*, *thrilled*, *impressed by*), and never uses formulaic headings like *"Two things from my background that may be relevant:"*.
+4. **Domain-Matched Proof**: Dynamically selects only the candidate achievements and projects that directly overlap with the company's stack.
+5. **Silent PDF Attachment**: Compiled 1-page PDF resume is attached cleanly to the email without advertising a "tailored PDF" in the message text.

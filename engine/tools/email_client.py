@@ -27,15 +27,13 @@ logger = logging.getLogger("EmailClient")
 
 def format_email_body_with_links(body: str) -> str:
     """
-    Ensures cold email body includes candidate signoff and 4 essential links:
-    - Google Drive Resume link
-    - Portfolio
-    - GitHub
-    - LinkedIn
+    Formats the email body cleanly with a plain human signoff and essential links,
+    stripping AI/spam markers such as em-dashes, emojis, bulleted link headers, and
+    'attached tailored resume' boilerplate lines.
     """
     body = (body or "").strip()
     if not body:
-        body = "Hi there,\n\nI am writing to express my strong interest in joining your team. I have attached my tailored resume for your review."
+        body = "Hi there,\n\nI saw what your team is building and wanted to reach out directly about engineering work on your stack."
 
     drive_link = RESUME_DRIVE_URL if (RESUME_DRIVE_URL and "YOUR_GOOGLE_DRIVE_RESUME_ID" not in RESUME_DRIVE_URL and "YOUR_RESUME_ID" not in RESUME_DRIVE_URL) else "https://drive.google.com/file/d/18kbu7pKjkYbaVGCq50BTCSFxtznOFUAT/view?usp=sharing"
 
@@ -45,31 +43,39 @@ def format_email_body_with_links(body: str) -> str:
             body = re.sub(rf"https://drive\.google\.com/file/d/{placeholder}/view\?usp=sharing", drive_link, body)
             body = body.replace(placeholder, "18kbu7pKjkYbaVGCq50BTCSFxtznOFUAT")
 
-    # 2. Check if links block is already present
+    # 2. Strip em-dashes, emojis, and any "Tailored PDF / attached resume" boilerplate lines
+    body = body.replace(" — ", " - ").replace("—", "-")
+    body = re.sub(r"\s*\(Tailored PDF also attached\)", "", body, flags=re.IGNORECASE)
+    body = re.sub(
+        r"(?im)^.*(?:tailored (?:1-page )?pdf|attached my tailored resume|please find (?:my )?resume attached|resume is also attached).*$\n?",
+        "",
+        body,
+    ).strip()
+
+    # 3. Check if links block is already present
     has_portfolio = (PORTFOLIO_URL and PORTFOLIO_URL in body) or "abhibuilds.work" in body
     has_github = (GITHUB_URL and GITHUB_URL in body) or "github.com/abhishek09827" in body
     has_drive = "drive.google.com" in body
 
     if has_portfolio and has_github:
         if not has_drive:
-            # Inject Drive link into existing links block if omitted
+            # Inject Drive link cleanly if omitted
             if "Verified Links:" in body:
-                body = body.replace("Verified Links:\n", f"Verified Links:\n• Master Resume (Google Drive): {drive_link}\n")
+                body = body.replace("Verified Links:\n", f"Verified Links:\nResume: {drive_link}\n")
             elif "Links:" in body:
-                body = body.replace("Links:\n", f"Links:\n• Master Resume (Google Drive): {drive_link}\n")
+                body = body.replace("Links:\n", f"Links:\nResume: {drive_link}\n")
             elif "• Portfolio:" in body:
-                body = body.replace("• Portfolio:", f"• Master Resume (Google Drive): {drive_link}\n• Portfolio:")
+                body = body.replace("• Portfolio:", f"Resume: {drive_link}\n• Portfolio:")
+            elif "Portfolio:" in body:
+                body = body.replace("Portfolio:", f"Resume: {drive_link}\nPortfolio:")
             else:
-                body += f"\n• Master Resume (Google Drive): {drive_link}"
+                body += f"\nResume: {drive_link}"
         return body
 
-    # 3. Clean off redundant signoffs from LLM generation
+    # 4. Clean off redundant signoffs from LLM generation
     signoff_patterns = [
-        r"(?i)\n+best regards,?\s*([a-zA-Z\s]+)?$",
-        r"(?i)\n+best,?\s*([a-zA-Z\s]+)?$",
-        r"(?i)\n+sincerely,?\s*([a-zA-Z\s]+)?$",
-        r"(?i)\n+thanks & regards,?\s*([a-zA-Z\s]+)?$",
-        r"(?i)\n+cheers,?\s*([a-zA-Z\s]+)?$"
+        r"(?i)\n+(?:best regards|warm regards|kind regards|regards|best|sincerely|thanks & regards|thank you|thanks|cheers),?\s*\n*([a-zA-Z\s]+)?$",
+        r"(?i)\n+[-–—]+\s*\n*([a-zA-Z\s]+)?$"
     ]
     cleaned_body = body
     for pat in signoff_patterns:
@@ -77,24 +83,21 @@ def format_email_body_with_links(body: str) -> str:
 
     links_block = []
     if drive_link:
-        links_block.append(f"• Master Resume (Google Drive): {drive_link}")
-    if PORTFOLIO_URL:
-        links_block.append(f"• Portfolio: {PORTFOLIO_URL}")
+        links_block.append(f"Resume: {drive_link}")
     if GITHUB_URL:
-        links_block.append(f"• GitHub: {GITHUB_URL}")
+        links_block.append(f"GitHub: {GITHUB_URL}")
+    if PORTFOLIO_URL:
+        links_block.append(f"Portfolio: {PORTFOLIO_URL}")
     if LINKEDIN_URL:
-        links_block.append(f"• LinkedIn: {LINKEDIN_URL}")
+        links_block.append(f"LinkedIn: {LINKEDIN_URL}")
 
     links_text = "\n".join(links_block)
 
     signature = (
-        f"\n\nBest regards,\n"
+        f"\n\nBest,\n"
         f"{CANDIDATE_NAME}\n"
-        f"{CANDIDATE_TITLE}\n"
-        f"{CANDIDATE_PHONE + ' | ' if CANDIDATE_PHONE else ''}{CANDIDATE_EMAIL}\n\n"
-        f"Verified Links:\n"
-        f"{links_text}\n\n"
-        f"📎 Tailored 1-page PDF resume is also attached for your convenience."
+        f"{CANDIDATE_PHONE + ' | ' if CANDIDATE_PHONE else ''}{CANDIDATE_EMAIL}\n"
+        f"{links_text}"
     )
 
     return f"{cleaned_body}{signature}".strip()
@@ -133,7 +136,7 @@ def dispatch_cold_email(
     msg = EmailMessage()
     msg["From"] = f"{CANDIDATE_NAME} <{active_user}>"
     msg["To"] = clean_email
-    msg["Subject"] = subject.strip()
+    msg["Subject"] = subject.strip().replace(" — ", " - ").replace("—", "-")
     formatted_body = format_email_body_with_links(body)
     msg.set_content(formatted_body.strip())
 
